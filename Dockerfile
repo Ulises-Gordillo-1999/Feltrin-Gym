@@ -42,12 +42,8 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Copiar migraciones SQL y script de inicialización automática
-COPY --chown=nextjs:nodejs ./drizzle ./drizzle
-COPY --chown=nextjs:nodejs ./scripts/bootstrap.js ./scripts/bootstrap.js
-
 USER nextjs
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "node ./scripts/bootstrap.js && node server.js"]
+CMD ["node", "server.js"]

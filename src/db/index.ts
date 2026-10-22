@@ -15,7 +15,7 @@ type Sql = ReturnType<typeof postgres>;
  */
 const globalForDb = globalThis as unknown as { __feltrinSql?: Sql };
 
-const client: Sql =
+export const client: Sql =
   globalForDb.__feltrinSql ??
   postgres(databaseUrl, {
     max: process.env.NODE_ENV === 'production' ? 10 : 5,
