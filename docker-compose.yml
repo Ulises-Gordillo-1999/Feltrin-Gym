@@ -1,0 +1,23 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: feltrin-gym-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: feltrin
+      POSTGRES_PASSWORD: feltrin_dev_password
+      POSTGRES_DB: feltrin_gym
+      TZ: America/Argentina/Buenos_Aires
+      PGTZ: America/Argentina/Buenos_Aires
+    ports:
+      - "5433:5432"
+    volumes:
+      - feltrin_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U feltrin -d feltrin_gym"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  feltrin_pgdata:
