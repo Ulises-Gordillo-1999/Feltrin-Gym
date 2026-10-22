@@ -52,7 +52,7 @@ export default function LoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@feltrin.com"
+              placeholder="tu@email.com"
               autoComplete="email"
               required
               leftIcon={<Mail className="w-4 h-4" />}
@@ -86,38 +86,40 @@ export default function LoginPage() {
             </div>
           </form>
 
-          {/* Accesos rápidos para testing de roles */}
-          <div className="mt-8 pt-6 border-t border-zinc-800/80">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 text-center mb-3">
-              Cuentas demo para pruebas rápidas
-            </p>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => fillCredentials('admin@feltrin.com', 'Admin1234!')}
-                className="p-2 rounded-xl border border-zinc-800 bg-zinc-900/80 hover:bg-zinc-800/90 text-zinc-300 hover:text-zinc-100 text-xs font-medium flex flex-col items-center gap-1.5 transition-all cursor-pointer"
-              >
-                <ShieldCheck className="w-4 h-4 text-purple-400" />
-                <span>Admin</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => fillCredentials('profe@feltrin.com', 'Profe1234!')}
-                className="p-2 rounded-xl border border-zinc-800 bg-zinc-900/80 hover:bg-zinc-800/90 text-zinc-300 hover:text-zinc-100 text-xs font-medium flex flex-col items-center gap-1.5 transition-all cursor-pointer"
-              >
-                <GraduationCap className="w-4 h-4 text-sky-400" />
-                <span>Profesor</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => fillCredentials('alumno@feltrin.com', 'Alumno1234!')}
-                className="p-2 rounded-xl border border-zinc-800 bg-zinc-900/80 hover:bg-zinc-800/90 text-zinc-300 hover:text-zinc-100 text-xs font-medium flex flex-col items-center gap-1.5 transition-all cursor-pointer"
-              >
-                <UserCheck className="w-4 h-4 text-emerald-400" />
-                <span>Alumno</span>
-              </button>
+          {/* Accesos rápidos para testing de roles (desactivados en producción) */}
+          {process.env.NODE_ENV !== 'production' && (
+            <div className="mt-8 pt-6 border-t border-zinc-800/80">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 text-center mb-3">
+                Cuentas demo para pruebas rápidas
+              </p>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => fillCredentials('admin@feltrin.com', 'Admin1234!')}
+                  className="p-2 rounded-xl border border-zinc-800 bg-zinc-900/80 hover:bg-zinc-800/90 text-zinc-300 hover:text-zinc-100 text-xs font-medium flex flex-col items-center gap-1.5 transition-all cursor-pointer"
+                >
+                  <ShieldCheck className="w-4 h-4 text-purple-400" />
+                  <span>Admin</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => fillCredentials('profe@feltrin.com', 'Profe1234!')}
+                  className="p-2 rounded-xl border border-zinc-800 bg-zinc-900/80 hover:bg-zinc-800/90 text-zinc-300 hover:text-zinc-100 text-xs font-medium flex flex-col items-center gap-1.5 transition-all cursor-pointer"
+                >
+                  <GraduationCap className="w-4 h-4 text-sky-400" />
+                  <span>Profesor</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => fillCredentials('alumno@feltrin.com', 'Alumno1234!')}
+                  className="p-2 rounded-xl border border-zinc-800 bg-zinc-900/80 hover:bg-zinc-800/90 text-zinc-300 hover:text-zinc-100 text-xs font-medium flex flex-col items-center gap-1.5 transition-all cursor-pointer"
+                >
+                  <UserCheck className="w-4 h-4 text-emerald-400" />
+                  <span>Alumno</span>
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         <p className="text-center text-xs text-zinc-400 mt-6">

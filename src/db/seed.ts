@@ -74,21 +74,20 @@ async function seed() {
 
   console.log('✓ Categorías de productos creadas.');
 
-  // 4. Usuarios Iniciales (Admin, Profesor, Alumno)
+  // 4. Usuarios Iniciales
+  const isProduction = process.env.NODE_ENV === 'production';
+  const adminEmail = process.env.SEED_ADMIN_EMAIL || 'admin@feltrin.com';
   const adminPassword = process.env.SEED_ADMIN_PASSWORD || 'Admin1234!';
-  const profePassword = 'Profe1234!';
-  const alumnoPassword = 'Alumno1234!';
+  const adminName = process.env.SEED_ADMIN_NAME || 'Administrador Feltrin';
 
   const adminHash = await bcrypt.hash(adminPassword, 10);
-  const profeHash = await bcrypt.hash(profePassword, 10);
-  const alumnoHash = await bcrypt.hash(alumnoPassword, 10);
 
   const [adminUser] = await db
     .insert(users)
     .values([
       {
-        email: process.env.SEED_ADMIN_EMAIL || 'admin@feltrin.com',
-        fullName: process.env.SEED_ADMIN_NAME || 'Administrador Feltrin',
+        email: adminEmail,
+        fullName: adminName,
         passwordHash: adminHash,
         role: 'ADMIN',
       },
@@ -96,33 +95,47 @@ async function seed() {
     .onConflictDoNothing()
     .returning();
 
-  const [profeUser] = await db
-    .insert(users)
-    .values([
-      {
-        email: 'profe@feltrin.com',
-        fullName: 'Prof. Lucas Giménez',
-        passwordHash: profeHash,
-        role: 'PROFESOR',
-      },
-    ])
-    .onConflictDoNothing()
-    .returning();
+  let profeUser = null;
+  let alumnoUser = null;
 
-  const [alumnoUser] = await db
-    .insert(users)
-    .values([
-      {
-        email: 'alumno@feltrin.com',
-        fullName: 'Martín Rodríguez',
-        passwordHash: alumnoHash,
-        role: 'ALUMNO',
-      },
-    ])
-    .onConflictDoNothing()
-    .returning();
+  if (!isProduction) {
+    const profePassword = 'Profe1234!';
+    const alumnoPassword = 'Alumno1234!';
+    const profeHash = await bcrypt.hash(profePassword, 10);
+    const alumnoHash = await bcrypt.hash(alumnoPassword, 10);
 
-  console.log('✓ Usuarios creados (admin@feltrin.com, profe@feltrin.com, alumno@feltrin.com).');
+    const [createdProfe] = await db
+      .insert(users)
+      .values([
+        {
+          email: 'profe@feltrin.com',
+          fullName: 'Prof. Lucas Giménez',
+          passwordHash: profeHash,
+          role: 'PROFESOR',
+        },
+      ])
+      .onConflictDoNothing()
+      .returning();
+    profeUser = createdProfe;
+
+    const [createdAlumno] = await db
+      .insert(users)
+      .values([
+        {
+          email: 'alumno@feltrin.com',
+          fullName: 'Martín Rodríguez',
+          passwordHash: alumnoHash,
+          role: 'ALUMNO',
+        },
+      ])
+      .onConflictDoNothing()
+      .returning();
+    alumnoUser = createdAlumno;
+
+    console.log('✓ Usuarios de desarrollo creados (profe@feltrin.com, alumno@feltrin.com).');
+  }
+
+  console.log(`✓ Administrador verificado (${adminEmail}).`);
 
   // Buscar admin si ya existía
   const effectiveAdmin =
@@ -132,8 +145,8 @@ async function seed() {
   const effectiveAlumnoUser =
     alumnoUser || (await db.query.users.findFirst({ where: (u, { eq }) => eq(u.role, 'ALUMNO') }));
 
-  if (!effectiveAdmin || !effectiveProfe) {
-    throw new Error('No se pudo resolver el admin o profesor para el seed.');
+  if (!effectiveAdmin) {
+    throw new Error('No se pudo resolver el admin para el seed.');
   }
 
   // 5. Planes de Membresía
@@ -264,8 +277,8 @@ async function seed() {
     console.log('✓ Productos iniciales de inventario cargados.');
   }
 
-  // 8. Alumno demo con membresía activa y rutina armada
-  if (effectiveAlumnoUser) {
+  // 8. Alumno demo con membresía activa y rutina armada (solo en desarrollo)
+  if (!isProduction && effectiveAlumnoUser && effectiveProfe) {
     const today = getTodayBusinessDate();
     const expiry = addDuration(today, 25, 'DIA'); // Vence en 25 días (Al día)
 
@@ -474,10 +487,15 @@ async function seed() {
 
   console.log('\n🚀 ¡Seed completado con éxito!');
   console.log('───────────────────────────────────────────────────────');
-  console.log('Credenciales de acceso para pruebas:');
-  console.log('• Administrador:  admin@feltrin.com  / Admin1234!');
-  console.log('• Profesor:       profe@feltrin.com  / Profe1234!');
-  console.log('• Alumno:         alumno@feltrin.com / Alumno1234!');
+  if (isProduction) {
+    console.log('Usuario Administrador de Producción:');
+    console.log(`• Administrador:  ${adminEmail}  / ${adminPassword}`);
+  } else {
+    console.log('Credenciales de acceso para pruebas locales:');
+    console.log(`• Administrador:  ${adminEmail}  / ${adminPassword}`);
+    console.log('• Profesor:       profe@feltrin.com  / Profe1234!');
+    console.log('• Alumno:         alumno@feltrin.com / Alumno1234!');
+  }
   console.log('───────────────────────────────────────────────────────');
   process.exit(0);
 }
