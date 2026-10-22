@@ -36,11 +36,11 @@ Este protocolo establece las reglas mandatorias e inquebrantables para la gesti�
 ## 🚫 Prohibiciones Estrictas (Código y Documentación)
 
 1. **Prohibido colocar contraseñas reales en `README.md` o documentación Markdown:**
-   - ❌ **INCORRECTO**: `SEED_ADMIN_PASSWORD=Motabotello1248.`
+   - ❌ **INCORRECTO**: Escribir la contraseña real del cliente o servidor en el documento.
    - ✅ **CORRECTO**: `SEED_ADMIN_PASSWORD=TuPasswordSeguro123!` o `SEED_ADMIN_PASSWORD="<tu-clave-aqui>"`
 
 2. **Prohibido colocar correos reales de producción en ejemplos públicos:**
-   - ❌ **INCORRECTO**: `SEED_ADMIN_EMAIL=feltringym@gmail.com`
+   - ❌ **INCORRECTO**: `SEED_ADMIN_EMAIL=correoreal@gmail.com`
    - ✅ **CORRECTO**: `SEED_ADMIN_EMAIL=admin@ejemplo.com`
 
 3. **Prohibido hardcodear secretos como valores por defecto (fallbacks) en código:**
