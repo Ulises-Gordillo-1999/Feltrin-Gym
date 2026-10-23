@@ -9,6 +9,7 @@ export default async function EjerciciosPage() {
   await requireRole(['ADMIN', 'PROFESOR']);
 
   const allExercises = await db.query.exercises.findMany({
+    where: (e, { eq }) => eq(e.isActive, true),
     orderBy: [asc(exercises.muscleGroup), asc(exercises.name)],
   });
 

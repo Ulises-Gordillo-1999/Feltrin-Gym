@@ -69,14 +69,49 @@ export async function updateExerciseAction(
         equipment,
         description,
         videoUrl,
+        updatedAt: new Date(),
       })
       .where(eq(exercises.id, id));
 
     revalidatePath('/ejercicios');
+    revalidatePath('/rutinas');
     return { status: 'success', message: 'Ejercicio actualizado correctamente.' };
   } catch (error) {
     console.error('Error updateExerciseAction:', error);
     return { status: 'error', message: 'Error al actualizar el ejercicio.' };
+  }
+}
+
+export async function deleteExerciseAction(id: string): Promise<ActionResult> {
+  await requireRole(['ADMIN', 'PROFESOR']);
+
+  if (!id) {
+    return { ok: false, error: 'ID de ejercicio no válido.' };
+  }
+
+  try {
+    // Verificar si el ejercicio está en uso en alguna rutina existente
+    const inUse = await db.query.routineExercises.findFirst({
+      where: (re, { eq }) => eq(re.exerciseId, id),
+    });
+
+    if (inUse) {
+      // Si está en uso en rutinas previas, se desactiva (soft delete) para proteger el historial
+      await db
+        .update(exercises)
+        .set({ isActive: false, updatedAt: new Date() })
+        .where(eq(exercises.id, id));
+    } else {
+      // Si no tiene dependencias, se elimina físicamente
+      await db.delete(exercises).where(eq(exercises.id, id));
+    }
+
+    revalidatePath('/ejercicios');
+    revalidatePath('/rutinas');
+    return { ok: true, data: undefined };
+  } catch (error) {
+    console.error('Error deleteExerciseAction:', error);
+    return { ok: false, error: 'No se pudo eliminar el ejercicio.' };
   }
 }
 
@@ -89,7 +124,7 @@ export async function toggleExerciseStatusAction(
   try {
     await db
       .update(exercises)
-      .set({ isActive: !currentActive })
+      .set({ isActive: !currentActive, updatedAt: new Date() })
       .where(eq(exercises.id, id));
 
     revalidatePath('/ejercicios');
