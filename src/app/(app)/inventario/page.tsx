@@ -9,6 +9,7 @@ export default async function InventarioPage() {
   await requireRole('ADMIN');
 
   const allProducts = await db.query.products.findMany({
+    where: eq(products.isActive, true),
     orderBy: [products.name],
     with: {
       category: { columns: { name: true } },

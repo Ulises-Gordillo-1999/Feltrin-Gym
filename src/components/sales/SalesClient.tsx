@@ -18,6 +18,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Select } from '@/components/ui/Select';
 import { Input } from '@/components/ui/Input';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { Modal } from '@/components/ui/Modal';
 import { registerSaleAction, voidSaleAction } from '@/app/actions/sales.actions';
 import { formatCurrency, formatDateTime } from '@/utils/format';
 import type { PaymentMethod } from '@/db/schema';
@@ -63,10 +64,14 @@ export function SalesClient({
 
   const [isCheckoutPending, startCheckoutTransition] = useTransition();
   const [lastSuccessTicket, setLastSuccessTicket] = useState<number | null>(null);
+  const [isCheckoutConfirmOpen, setIsCheckoutConfirmOpen] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [cartWarning, setCartWarning] = useState<string | null>(null);
 
   // Dialog anulación
   const [voidSaleId, setVoidSaleId] = useState<string | null>(null);
   const [voidReason, setVoidReason] = useState('');
+  const [voidError, setVoidError] = useState<string | null>(null);
   const [isVoidPending, startVoidTransition] = useTransition();
 
   const filteredProducts = products.filter(
@@ -81,7 +86,8 @@ export function SalesClient({
       const existing = prev.find((item) => item.product.id === product.id);
       if (existing) {
         if (existing.quantity >= product.stock) {
-          alert(`No hay más stock disponible para ${product.name}`);
+          setCartWarning(`No hay más stock disponible para ${product.name}`);
+          setTimeout(() => setCartWarning(null), 3500);
           return prev;
         }
         return prev.map((item) =>
@@ -100,7 +106,11 @@ export function SalesClient({
         .map((item) => {
           if (item.product.id === productId) {
             const nextQty = item.quantity + delta;
-            if (nextQty > item.product.stock) return item;
+            if (nextQty > item.product.stock) {
+              setCartWarning(`No podés superar el stock disponible de ${item.product.name}`);
+              setTimeout(() => setCartWarning(null), 3500);
+              return item;
+            }
             return { ...item, quantity: nextQty };
           }
           return item;
@@ -118,43 +128,52 @@ export function SalesClient({
     0,
   );
 
+  const selectedStudent = students.find((s) => s.id === studentId);
+  const clientDisplayName = selectedStudent
+    ? selectedStudent.fullName
+    : customerName.trim() || 'Consumidor Final';
+
   const handleCheckout = () => {
     if (cart.length === 0) return;
+    setCheckoutError(null);
 
     startCheckoutTransition(async () => {
       const res = await registerSaleAction(
         studentId || null,
-        studentId ? null : customerName || 'Consumidor Final',
+        studentId ? null : customerName.trim() || 'Consumidor Final',
         paymentMethod,
         cart.map((item) => ({
           productId: item.product.id,
           quantity: item.quantity,
         })),
-        notes || null,
+        notes.trim() || null,
       );
 
       if (res.ok) {
+        setIsCheckoutConfirmOpen(false);
         setLastSuccessTicket(res.data.saleNumber);
         setCart([]);
         setStudentId('');
         setCustomerName('');
         setNotes('');
+        setCheckoutError(null);
         setTimeout(() => setLastSuccessTicket(null), 6000);
       } else {
-        alert(res.error);
+        setCheckoutError(res.error);
       }
     });
   };
 
   const handleConfirmVoid = () => {
     if (!voidSaleId) return;
+    setVoidError(null);
     startVoidTransition(async () => {
       const res = await voidSaleAction(voidSaleId, voidReason || 'Venta anulada');
       if (res.ok) {
         setVoidSaleId(null);
         setVoidReason('');
       } else {
-        alert(res.error);
+        setVoidError(res.error);
       }
     });
   };
@@ -170,6 +189,12 @@ export function SalesClient({
           Venta de suplementos, indumentaria y bebidas con descuento automático de stock y registro en caja.
         </p>
       </div>
+
+      {cartWarning && (
+        <div className="p-3 rounded-xl bg-amber-950/60 border border-amber-800 text-amber-300 text-xs font-medium">
+          {cartWarning}
+        </div>
+      )}
 
       {lastSuccessTicket && (
         <div className="p-4 rounded-2xl bg-emerald-950/60 border border-emerald-800 text-emerald-300 flex items-center justify-between">
@@ -350,8 +375,7 @@ export function SalesClient({
               size="lg"
               className="w-full"
               disabled={cart.length === 0}
-              onClick={handleCheckout}
-              isLoading={isCheckoutPending}
+              onClick={() => setIsCheckoutConfirmOpen(true)}
               icon={<CreditCard className="w-5 h-5" />}
             >
               Completar Venta y Cobrar
@@ -446,6 +470,103 @@ export function SalesClient({
           </div>
         )}
       </Card>
+
+      {/* Modal Desacoplado: Confirmación de Venta y Cobro */}
+      <Modal
+        isOpen={isCheckoutConfirmOpen}
+        onClose={() => {
+          if (!isCheckoutPending) setIsCheckoutConfirmOpen(false);
+        }}
+        title="Confirmar Venta y Cobro"
+        description="Revisá los datos de la operación antes de asentar el cobro y descontar el stock."
+        maxWidth="md"
+      >
+        <div className="space-y-4">
+          {checkoutError && (
+            <div className="p-3 rounded-xl bg-rose-950/60 border border-rose-900 text-rose-300 text-xs">
+              {checkoutError}
+            </div>
+          )}
+
+          {/* Resumen del Cliente y Método */}
+          <div className="p-3.5 rounded-xl bg-zinc-950/80 border border-zinc-800/90 space-y-2.5 text-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-zinc-400 font-medium">Cliente:</span>
+              <span className="font-semibold text-zinc-100">{clientDisplayName}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-zinc-400 font-medium">Método de Cobro:</span>
+              <Badge variant="emerald" size="sm">
+                {paymentMethod.replace('_', ' ')}
+              </Badge>
+            </div>
+            {notes.trim() && (
+              <div className="flex items-center justify-between pt-2 border-t border-zinc-800/60">
+                <span className="text-zinc-400 font-medium">Notas:</span>
+                <span className="text-zinc-300 italic">{notes}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Desglose de Artículos */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
+                Detalle de Artículos
+              </span>
+              <span className="text-xs text-zinc-500 font-mono">
+                {cart.reduce((a, b) => a + b.quantity, 0)} {cart.reduce((a, b) => a + b.quantity, 0) === 1 ? 'unidad' : 'unidades'}
+              </span>
+            </div>
+            <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1 divide-y divide-zinc-800/60 border border-zinc-800/80 rounded-xl p-3 bg-zinc-950/40">
+              {cart.map((item) => (
+                <div key={item.product.id} className="pt-1.5 first:pt-0 flex items-center justify-between text-xs">
+                  <div className="min-w-0 pr-2">
+                    <span className="font-medium text-zinc-200 block truncate">
+                      {item.quantity}x {item.product.name}
+                    </span>
+                    <span className="text-[11px] text-zinc-500 font-mono">
+                      {formatCurrency(item.product.salePrice)} c/u
+                    </span>
+                  </div>
+                  <span className="font-bold text-zinc-100 font-mono shrink-0">
+                    {formatCurrency(item.product.salePrice * item.quantity)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Total Destacado */}
+          <div className="p-3 rounded-xl bg-zinc-950/80 border border-zinc-800/80 flex items-center justify-between">
+            <span className="text-sm font-bold text-zinc-200">Total a Cobrar:</span>
+            <span className="text-2xl font-black text-emerald-400 font-mono">
+              {formatCurrency(cartTotal)}
+            </span>
+          </div>
+
+          {/* Acciones */}
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-zinc-800">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isCheckoutPending}
+              onClick={() => setIsCheckoutConfirmOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              isLoading={isCheckoutPending}
+              onClick={handleCheckout}
+              icon={<CreditCard className="w-4 h-4" />}
+            >
+              Confirmar y Registrar Venta
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
       {/* ConfirmDialog: Anular Venta */}
       <ConfirmDialog
