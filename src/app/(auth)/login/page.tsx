@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useActionState, useState } from 'react';
-import { Dumbbell, Lock, Mail, ArrowRight, ShieldCheck, UserCheck, GraduationCap } from 'lucide-react';
+import { Dumbbell, Lock, Mail, ArrowRight, ShieldCheck, UserCheck, GraduationCap, Eye, EyeOff } from 'lucide-react';
 import { loginAction } from '@/app/actions/auth.actions';
 import { IDLE } from '@/types';
 import { Button } from '@/components/ui/Button';
@@ -11,6 +11,7 @@ export default function LoginPage() {
   const [state, formAction, isPending] = useActionState(loginAction, IDLE);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const fillCredentials = (userEmail: string, userPass: string) => {
     setEmail(userEmail);
@@ -62,13 +63,24 @@ export default function LoginPage() {
             <Input
               label="Contraseña"
               name="password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               autoComplete="current-password"
               required
               leftIcon={<Lock className="w-4 h-4" />}
+              rightIcon={
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="p-1 rounded-md text-zinc-400 hover:text-zinc-200 focus:outline-none transition-colors cursor-pointer"
+                  title={showPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              }
               error={state.status === 'error' ? state.fieldErrors?.password : undefined}
             />
 
