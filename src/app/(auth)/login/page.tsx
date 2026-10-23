@@ -20,30 +20,36 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-zinc-950 flex flex-col justify-center items-center p-4 relative overflow-hidden">
-      {/* Luces de fondo ambientales */}
-      <div className="absolute top-1/4 -left-32 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
+      {/* Luces de fondo ambientales sutiles */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[520px] h-[520px] bg-emerald-500/10 blur-[130px] rounded-full pointer-events-none" />
+      <div className="absolute top-10 right-10 w-80 h-80 bg-teal-500/5 blur-3xl pointer-events-none" />
+      <div className="absolute bottom-10 left-10 w-80 h-80 bg-emerald-500/5 blur-3xl pointer-events-none" />
 
+      {/* Tarjeta Unificada de Acceso */}
       <div className="w-full max-w-md relative z-10">
-        {/* Brand */}
-        <div className="text-center mb-8">
-          <div className="inline-flex w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 items-center justify-center text-zinc-950 shadow-2xl shadow-emerald-500/20 mb-4">
-            <Dumbbell className="w-8 h-8 stroke-[2.5]" />
+        <div className="rounded-3xl border border-zinc-800/90 bg-zinc-900/70 backdrop-blur-2xl p-7 sm:p-9 shadow-2xl shadow-black/90 ring-1 ring-white/5">
+          {/* Header de Marca Integrado */}
+          <div className="text-center">
+            <div className="inline-flex w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 items-center justify-center text-zinc-950 shadow-xl shadow-emerald-500/20 mb-4 ring-4 ring-emerald-500/10">
+              <Dumbbell className="w-7 h-7 stroke-[2.5]" />
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight text-zinc-100">
+              Centro de Entrenamiento Feltrin
+            </h1>
+            <p className="mt-1.5 text-xs sm:text-sm text-zinc-400 leading-relaxed">
+              Ingresá tus credenciales para acceder al sistema
+            </p>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-100">
-            Centro de Entrenamiento Feltrin
-          </h1>
-          <p className="mt-1.5 text-sm text-zinc-400">
-            Ingresá a tu cuenta para gestionar el gimnasio o tu rutina
-          </p>
-        </div>
 
-        {/* Card de Login */}
-        <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/60 backdrop-blur-xl p-6 sm:p-8 shadow-2xl shadow-black/80">
+          {/* Divisor sutil */}
+          <div className="my-6 h-px bg-gradient-to-r from-transparent via-zinc-800 to-transparent" />
+
+          {/* Formulario de Login */}
           <form action={formAction} className="space-y-4">
             {state.status === 'error' && (
-              <div className="p-3 rounded-xl bg-rose-950/50 border border-rose-900/70 text-rose-300 text-xs font-medium">
-                {state.message}
+              <div className="p-3 rounded-xl bg-rose-950/60 border border-rose-900/80 text-rose-300 text-xs font-medium flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0" />
+                <span>{state.message}</span>
               </div>
             )}
 
@@ -98,9 +104,15 @@ export default function LoginPage() {
             </div>
           </form>
 
+          {/* Badge de Seguridad */}
+          <div className="mt-6 pt-5 border-t border-zinc-800/60 flex items-center justify-center gap-1.5 text-[11px] text-zinc-400">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Acceso seguro y encriptado</span>
+          </div>
+
           {/* Accesos rápidos para testing de roles (desactivados en producción) */}
           {process.env.NODE_ENV !== 'production' && (
-            <div className="mt-8 pt-6 border-t border-zinc-800/80">
+            <div className="mt-6 pt-5 border-t border-zinc-800/80">
               <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 text-center mb-3">
                 Cuentas demo para pruebas rápidas
               </p>
@@ -134,8 +146,8 @@ export default function LoginPage() {
           )}
         </div>
 
-        <p className="text-center text-xs text-zinc-400 mt-6">
-          Feltrin Gym • Despliegue optimizado en Coolify v4
+        <p className="text-center text-[11px] text-zinc-400 mt-5">
+          Feltrin Gym • Panel de Gestión
         </p>
       </div>
     </div>
