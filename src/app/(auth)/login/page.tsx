@@ -1,8 +1,24 @@
 'use client';
 
-import React, { useActionState, useState } from 'react';
-import { Dumbbell, Lock, Mail, ArrowRight, ShieldCheck, UserCheck, GraduationCap, Eye, EyeOff } from 'lucide-react';
+import React, { useActionState, useState, useEffect } from 'react';
+import {
+  Dumbbell,
+  Lock,
+  Mail,
+  ArrowRight,
+  ShieldCheck,
+  UserCheck,
+  GraduationCap,
+  Eye,
+  EyeOff,
+  Fingerprint,
+} from 'lucide-react';
+import { startAuthentication } from '@simplewebauthn/browser';
 import { loginAction } from '@/app/actions/auth.actions';
+import {
+  getAuthenticationOptionsAction,
+  verifyAuthenticationAction,
+} from '@/app/actions/webauthn.actions';
 import { IDLE } from '@/types';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -13,10 +29,71 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
+  // Estados PWA y Huella Dactilar
+  const [isStandalone, setIsStandalone] = useState(false);
+  const [hasBiometrics, setHasBiometrics] = useState(false);
+  const [isBiometricPending, setIsBiometricPending] = useState(false);
+  const [biometricError, setBiometricError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Detectar si está instalada en el celular (modo standalone)
+    const standalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as any).standalone === true;
+
+    setIsStandalone(standalone);
+
+    // Verificar si el dispositivo tiene sensor de huella / Face ID
+    if (
+      typeof window !== 'undefined' &&
+      window.PublicKeyCredential &&
+      typeof PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable === 'function'
+    ) {
+      PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
+        .then((available) => setHasBiometrics(available))
+        .catch(() => setHasBiometrics(false));
+    }
+  }, []);
+
+  const handleBiometricLogin = async () => {
+    setBiometricError(null);
+    setIsBiometricPending(true);
+
+    try {
+      const optRes = await getAuthenticationOptionsAction();
+      if (!optRes.ok) {
+        setBiometricError(optRes.error);
+        setIsBiometricPending(false);
+        return;
+      }
+
+      // Abre el lector nativo de huella / Face ID del teléfono
+      const assertion = await startAuthentication({ optionsJSON: optRes.data });
+      const verifyRes = await verifyAuthenticationAction(assertion);
+
+      if (verifyRes.ok) {
+        window.location.href = verifyRes.data.redirectUrl;
+      } else {
+        setBiometricError(verifyRes.error);
+        setIsBiometricPending(false);
+      }
+    } catch (err: any) {
+      console.error('Error en autenticación biométrica:', err);
+      if (err.name === 'NotAllowedError') {
+        setBiometricError('Autenticación con huella cancelada.');
+      } else {
+        setBiometricError(err.message || 'Error al autenticar con huella dactilar.');
+      }
+      setIsBiometricPending(false);
+    }
+  };
+
   const fillCredentials = (userEmail: string, userPass: string) => {
     setEmail(userEmail);
     setPassword(userPass);
   };
+
+  const activeError = biometricError || (state.status === 'error' ? state.message : null);
 
   return (
     <div className="min-h-screen bg-zinc-950 flex flex-col justify-center items-center p-4 relative overflow-hidden">
@@ -37,22 +114,47 @@ export default function LoginPage() {
               Centro de Entrenamiento Feltrin
             </h1>
             <p className="mt-1.5 text-xs sm:text-sm text-zinc-400 leading-relaxed">
-              Ingresá tus credenciales para acceder al sistema
+              Ingresá a tu cuenta para gestionar el gimnasio o tu rutina
             </p>
           </div>
 
           {/* Divisor sutil */}
           <div className="my-6 h-px bg-gradient-to-r from-transparent via-zinc-800 to-transparent" />
 
+          {/* Error Banner si existe */}
+          {activeError && (
+            <div className="mb-4 p-3 rounded-xl bg-rose-950/60 border border-rose-900/80 text-rose-300 text-xs font-medium flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0" />
+              <span>{activeError}</span>
+            </div>
+          )}
+
+          {/* Botón Acceso Rápido con Huella Dactilar (exclusivo para PWA instalada o móvil con biometría) */}
+          {(isStandalone || hasBiometrics) && (
+            <div className="space-y-4 mb-5">
+              <button
+                type="button"
+                onClick={handleBiometricLogin}
+                disabled={isBiometricPending}
+                className="w-full flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-zinc-950 font-bold text-sm shadow-lg shadow-emerald-500/20 transition-all cursor-pointer active:scale-[0.99] disabled:opacity-50"
+              >
+                <Fingerprint className="w-5 h-5 stroke-[2.5]" />
+                <span>
+                  {isBiometricPending ? 'Leyendo huella dactilar...' : 'Ingresar con Huella Dactilar'}
+                </span>
+              </button>
+
+              <div className="relative flex items-center justify-center">
+                <div className="border-t border-zinc-800 w-full" />
+                <span className="bg-zinc-900 px-3 text-[11px] font-medium text-zinc-400 uppercase tracking-wider shrink-0">
+                  o con tu correo
+                </span>
+              </div>
+            </div>
+          )}
+
           {/* Formulario de Login */}
           <form action={formAction} className="space-y-4">
-            {state.status === 'error' && (
-              <div className="p-3 rounded-xl bg-rose-950/60 border border-rose-900/80 text-rose-300 text-xs font-medium flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0" />
-                <span>{state.message}</span>
-              </div>
-            )}
-
             <Input
               label="Correo Electrónico"
               name="email"
@@ -107,7 +209,7 @@ export default function LoginPage() {
           {/* Badge de Seguridad */}
           <div className="mt-6 pt-5 border-t border-zinc-800/60 flex items-center justify-center gap-1.5 text-[11px] text-zinc-400">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Acceso seguro y encriptado</span>
+            <span>Acceso seguro y encriptado con WebAuthn</span>
           </div>
 
           {/* Accesos rápidos para testing de roles (desactivados en producción) */}

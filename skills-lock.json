@@ -1,0 +1,179 @@
+{
+  "version": 1,
+  "skills": {
+    "api-and-interface-design": {
+      "source": "Ulises-Gordillo-1999/template-coolify-nextjs",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/api-and-interface-design/SKILL.md",
+      "computedHash": "59be45592750e828cd1c41826d9f20b9504a5b6f021a9a66d336a86a6a76fa22"
+    },
+    "browser-testing-with-devtools": {
+      "source": "Ulises-Gordillo-1999/template-coolify-nextjs",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/browser-testing-with-devtools/SKILL.md",
+      "computedHash": "b76a5f74e6537cb77752a5838ab779ef685cdc46eac7cd7d1c1bcb952351a5f0"
+    },
+    "ci-cd-and-automation": {
+      "source": "Ulises-Gordillo-1999/template-coolify-nextjs",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/ci-cd-and-automation/SKILL.md",
+      "computedHash": "f022532d69fc195657065e5bd218e11f345501488ff0cc88dc1f190f6e244550"
+    },
+    "code-review-and-quality": {
+      "source": "Ulises-Gordillo-1999/template-coolify-nextjs",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/code-review-and-quality/SKILL.md",
+      "computedHash": "d3df68dd1c2e7e37896b14aa80904703995f36ddd9785ace23f2112532c0539b"
+    },
+    "code-simplification": {
+      "source": "Ulises-Gordillo-1999/template-coolify-nextjs",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/code-simplification/SKILL.md",
+      "computedHash": "cd5fac3e5ce2c30f3e07beac56edb688d9b98f15bfec06b360c0412e2159f142"
+    },
+    "constraint-driven-development": {
+      "source": "Ulises-Gordillo-1999/template-coolify-nextjs",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/constraint-driven-development/SKILL.md",
+      "computedHash": "5f523976e635a8b4a6f0c724ebae49605f4046db5c64572594e176c3d37e37bc"
+    },
+    "context-engineering": {
+      "source": "Ulises-Gordillo-1999/template-coolify-nextjs",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/context-engineering/SKILL.md",
+      "computedHash": "4c16003afcdf45d29121c95f1e165c5cf7e0ee6e051d3ff95ea9a3b5e09c07a4"
+    },
+    "deprecation-and-migration": {
+      "source": "Ulises-Gordillo-1999/template-coolify-nextjs",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/deprecation-and-migration/SKILL.md",
+      "computedHash": "64ea0b1100afa6e90676829c5ee1f3524f9acb5e56c2228b7b12a52c874d8499"
+    },
+    "documentation-and-adrs": {
+      "source": "Ulises-Gordillo-1999/template-coolify-nextjs",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/documentation-and-adrs/SKILL.md",
+      "computedHash": "60cac3bb893ae001000d98a3f057cbed862871898606042499cdb8acc3147272"
+    },
+    "doubt-driven-development": {
+      "source": "Ulises-Gordillo-1999/template-coolify-nextjs",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/doubt-driven-development/SKILL.md",
+      "computedHash": "2d26ec443724c7191a1c4efb47b2bad200d1465223ff3af70c6d6e6bf8fa9c99"
+    },
+    "env-security-protocol": {
+      "source": "Ulises-Gordillo-1999/template-coolify-nextjs",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/env-security-protocol/SKILL.md",
+      "computedHash": "5b176830d90fd141462a5efcb320e5bdf411eba2c907c42f6f0152b30b683862"
+    },
+    "frontend-ui-engineering": {
+      "source": "Ulises-Gordillo-1999/template-coolify-nextjs",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/frontend-ui-engineering/SKILL.md",
+      "computedHash": "5401e18798a9190331965bccb624646dd2263b13e50b6835b70b9b1de2caadf7"
+    },
+    "git-workflow-and-versioning": {
+      "source": "Ulises-Gordillo-1999/template-coolify-nextjs",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/git-workflow-and-versioning/SKILL.md",
+      "computedHash": "e17f529b33eaeab107cc0f9e31a760e250f333033a26e8aa1f4fac5c60e1d9d3"
+    },
+    "idea-refine": {
+      "source": "Ulises-Gordillo-1999/template-coolify-nextjs",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/idea-refine/SKILL.md",
+      "computedHash": "00812f316a20aa3da2bb5879cb746959c43eb41e6a33d07a75b985e1f97c4e85"
+    },
+    "incremental-implementation": {
+      "source": "Ulises-Gordillo-1999/template-coolify-nextjs",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/incremental-implementation/SKILL.md",
+      "computedHash": "11ac131a43ac1a06797023895279582d63959851fd064b079f07faaf65f188e7"
+    },
+    "interview-me": {
+      "source": "Ulises-Gordillo-1999/template-coolify-nextjs",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/interview-me/SKILL.md",
+      "computedHash": "e06c96fbf144c59b663dac7a4a18fc4ffb260738a0107b14af4982acad4c294f"
+    },
+    "new-app-scaffolding": {
+      "source": "Ulises-Gordillo-1999/template-coolify-nextjs",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/new-app-scaffolding/SKILL.md",
+      "computedHash": "9469a3ab76523dee96d6ac50dd784dc66e4b8a2faec7ffbf994b68e2ace6b141"
+    },
+    "observability-and-instrumentation": {
+      "source": "Ulises-Gordillo-1999/template-coolify-nextjs",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/observability-and-instrumentation/SKILL.md",
+      "computedHash": "bf3f7f7c5688d1fa57cec048cb03ccd8e9ad000aeb9e8584d3ea2b9031a1aebd"
+    },
+    "performance-optimization": {
+      "source": "Ulises-Gordillo-1999/template-coolify-nextjs",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/performance-optimization/SKILL.md",
+      "computedHash": "3e6e3223601a4adf494c165077f03fc89bc28c0c63c4e5223ee5ae1194d5b385"
+    },
+    "planning-and-task-breakdown": {
+      "source": "Ulises-Gordillo-1999/template-coolify-nextjs",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/planning-and-task-breakdown/SKILL.md",
+      "computedHash": "ecbce03e7957d968904d67d16b8b0249998efd45f323268ff268c123df19c617"
+    },
+    "responsive-design": {
+      "source": "Ulises-Gordillo-1999/template-coolify-nextjs",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/responsive-design/SKILL.md",
+      "computedHash": "5a2b7d75e0ed1525947a57b6a47003081c841ed85733562f73796ecd5b8d57aa"
+    },
+    "security-and-hardening": {
+      "source": "Ulises-Gordillo-1999/template-coolify-nextjs",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/security-and-hardening/SKILL.md",
+      "computedHash": "cd7a4ebc0a6c5f41965b514232c607110e5302a4806bf418353411085b9676c3"
+    },
+    "semver-version-control": {
+      "source": "Ulises-Gordillo-1999/template-coolify-nextjs",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/semver-version-control/SKILL.md",
+      "computedHash": "862b552635372fdf656d660154e88189ead993f282d02a479d1db9d719d688f5"
+    },
+    "shipping-and-launch": {
+      "source": "Ulises-Gordillo-1999/template-coolify-nextjs",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/shipping-and-launch/SKILL.md",
+      "computedHash": "577dc388e24164f21848d725ed1eafd91a0cbd836747acfa0c6d1f3924a157d6"
+    },
+    "source-driven-development": {
+      "source": "Ulises-Gordillo-1999/template-coolify-nextjs",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/source-driven-development/SKILL.md",
+      "computedHash": "efde5997aa60d230c3b843e506b28cadc15dbdaabdfecf9a7e64c2fd8e13c9ea"
+    },
+    "spec-driven-development": {
+      "source": "Ulises-Gordillo-1999/template-coolify-nextjs",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/spec-driven-development/SKILL.md",
+      "computedHash": "ab20d71418576726815b31fe206a7b766c4128187277715ff0bcfcc84f67d350"
+    },
+    "test-driven-development": {
+      "source": "Ulises-Gordillo-1999/template-coolify-nextjs",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/test-driven-development/SKILL.md",
+      "computedHash": "57278e11181fee6bfbb285f75abadb7e0d107c6e97513ca2f087cfc7b8a08906"
+    },
+    "theme-mode-system": {
+      "source": "Ulises-Gordillo-1999/template-coolify-nextjs",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/theme-mode-system/SKILL.md",
+      "computedHash": "1338d1ca624a59061c13f6aa9649d01d9fd77064a35cd06157bbe98fe4774bcd"
+    },
+    "using-agent-skills": {
+      "source": "addyosmani/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/using-agent-skills/SKILL.md",
+      "computedHash": "4221dc84c943696829025a42c7961b257afdb8f1ba20af42463434a0d9c03812"
+    }
+  }
+}

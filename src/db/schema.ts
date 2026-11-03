@@ -6,6 +6,7 @@ import {
   varchar,
   text,
   integer,
+  bigint,
   smallint,
   numeric,
   boolean,
@@ -589,6 +590,49 @@ export const studentRoutines = pgTable(
   ],
 );
 
+/* â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â•  MÃ“DULO 7 Â· PWA, WebAuthn & Push Notifications â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â•  */
+
+export const userPasskeys = pgTable(
+  'user_passkeys',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    credentialId: text('credential_id').notNull(),
+    publicKey: text('public_key').notNull(),
+    counter: bigint('counter', { mode: 'number' }).notNull().default(0),
+    deviceType: varchar('device_type', { length: 32 }).default('singleDevice'),
+    backedUp: boolean('backed_up').notNull().default(false),
+    transports: text('transports'),
+    friendlyName: varchar('friendly_name', { length: 100 }),
+    createdAt: timestamps.createdAt,
+    lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
+  },
+  (t) => [
+    uniqueIndex('user_passkeys_credential_id_unique').on(t.credentialId),
+    index('user_passkeys_user_idx').on(t.userId),
+  ],
+);
+
+export const userPushSubscriptions = pgTable(
+  'user_push_subscriptions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    endpoint: text('endpoint').notNull(),
+    p256dh: text('p256dh').notNull(),
+    auth: text('auth').notNull(),
+    createdAt: timestamps.createdAt,
+  },
+  (t) => [
+    uniqueIndex('user_push_endpoint_unique').on(t.endpoint),
+    index('user_push_user_idx').on(t.userId),
+  ],
+);
+
 /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Relations â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 export const usersRelations = relations(users, ({ one, many }) => ({
@@ -598,6 +642,22 @@ export const usersRelations = relations(users, ({ one, many }) => ({
     relationName: 'studentUser',
   }),
   trainees: many(students, { relationName: 'trainer' }),
+  passkeys: many(userPasskeys),
+  pushSubscriptions: many(userPushSubscriptions),
+}));
+
+export const userPasskeysRelations = relations(userPasskeys, ({ one }) => ({
+  user: one(users, {
+    fields: [userPasskeys.userId],
+    references: [users.id],
+  }),
+}));
+
+export const userPushSubscriptionsRelations = relations(userPushSubscriptions, ({ one }) => ({
+  user: one(users, {
+    fields: [userPushSubscriptions.userId],
+    references: [users.id],
+  }),
 }));
 
 export const gymSettingsRelations = relations(gymSettings, () => ({}));
@@ -772,4 +832,9 @@ export type MembershipReminder = typeof membershipReminders.$inferSelect;
 export type NewMembershipReminder = typeof membershipReminders.$inferInsert;
 export type ReminderType = (typeof reminderTypeEnum.enumValues)[number];
 export type ReminderChannel = (typeof reminderChannelEnum.enumValues)[number];
+
+export type UserPasskey = typeof userPasskeys.$inferSelect;
+export type NewUserPasskey = typeof userPasskeys.$inferInsert;
+export type UserPushSubscription = typeof userPushSubscriptions.$inferSelect;
+export type NewUserPushSubscription = typeof userPushSubscriptions.$inferInsert;
 

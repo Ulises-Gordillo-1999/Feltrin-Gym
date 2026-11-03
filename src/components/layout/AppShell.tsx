@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
+import { MobileOnboardingModal } from '@/components/pwa/MobileOnboardingModal';
 import type { SessionUser } from '@/types';
 
 export interface AppShellProps {
@@ -14,7 +15,10 @@ export function AppShell({ user, children }: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex pb-safe">
+      {/* Modal de bienvenida/activación de huella y alertas en móvil */}
+      <MobileOnboardingModal user={user} />
+
       {/* Sidebar fijo a la izquierda */}
       <Sidebar
         role={user.role}
