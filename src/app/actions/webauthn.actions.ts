@@ -17,6 +17,45 @@ import type { ActionResult } from '@/types';
 
 const CHALLENGE_COOKIE = 'feltrin_webauthn_challenge';
 
+let tablesEnsured = false;
+
+export async function ensureWebAuthnTables(): Promise<void> {
+  if (tablesEnsured) return;
+  try {
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS "user_passkeys" (
+        "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+        "user_id" uuid NOT NULL REFERENCES "users"("id") ON DELETE CASCADE,
+        "credential_id" text NOT NULL,
+        "public_key" text NOT NULL,
+        "counter" bigint DEFAULT 0 NOT NULL,
+        "device_type" varchar(32) DEFAULT 'singleDevice',
+        "backed_up" boolean DEFAULT false NOT NULL,
+        "transports" text,
+        "friendly_name" varchar(100),
+        "created_at" timestamp with time zone DEFAULT now() NOT NULL,
+        "last_used_at" timestamp with time zone
+      );
+      CREATE UNIQUE INDEX IF NOT EXISTS "user_passkeys_credential_id_unique" ON "user_passkeys" ("credential_id");
+      CREATE INDEX IF NOT EXISTS "user_passkeys_user_idx" ON "user_passkeys" ("user_id");
+
+      CREATE TABLE IF NOT EXISTS "user_push_subscriptions" (
+        "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+        "user_id" uuid NOT NULL REFERENCES "users"("id") ON DELETE CASCADE,
+        "endpoint" text NOT NULL,
+        "p256dh" text NOT NULL,
+        "auth" text NOT NULL,
+        "created_at" timestamp with time zone DEFAULT now() NOT NULL
+      );
+      CREATE UNIQUE INDEX IF NOT EXISTS "user_push_endpoint_unique" ON "user_push_subscriptions" ("endpoint");
+      CREATE INDEX IF NOT EXISTS "user_push_user_idx" ON "user_push_subscriptions" ("user_id");
+    `);
+    tablesEnsured = true;
+  } catch (err) {
+    console.error('Error ensuring webauthn tables:', err);
+  }
+}
+
 async function getWebAuthnConfig() {
   const reqHeaders = await headers();
   const host = reqHeaders.get('host') || 'localhost:3001';
@@ -46,6 +85,7 @@ async function getWebAuthnConfig() {
  * 1. Genera opciones de registro de huella/Face ID (WebAuthn) para el usuario autenticado.
  */
 export async function getRegistrationOptionsAction(): Promise<ActionResult<any>> {
+  await ensureWebAuthnTables();
   const session = await requireSession();
   const { rpID, rpName } = await getWebAuthnConfig();
 
@@ -144,6 +184,7 @@ export async function verifyRegistrationAction(
  * 3. Genera opciones de autenticación para iniciar sesión con huella (Passwordless).
  */
 export async function getAuthenticationOptionsAction(): Promise<ActionResult<any>> {
+  await ensureWebAuthnTables();
   const { rpID } = await getWebAuthnConfig();
 
   const options = await generateAuthenticationOptions({
@@ -261,6 +302,7 @@ export async function savePushSubscriptionAction(subscription: {
   endpoint: string;
   keys: { p256dh: string; auth: string };
 }): Promise<ActionResult> {
+  await ensureWebAuthnTables();
   const session = await getSession();
   if (!session) return { ok: false, error: 'No autorizado' };
 
@@ -298,6 +340,7 @@ export async function savePushSubscriptionAction(subscription: {
  * 6. Verifica si el usuario actual ya tiene alguna huella registrada.
  */
 export async function getUserPasskeysCountAction(): Promise<number> {
+  await ensureWebAuthnTables();
   const session = await getSession();
   if (!session) return 0;
 
