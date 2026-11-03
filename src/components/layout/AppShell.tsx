@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { MobileOnboardingModal } from '@/components/pwa/MobileOnboardingModal';
+import { PwaInstallBanner } from '@/components/pwa/PwaInstallBanner';
 import type { SessionUser } from '@/types';
 
 export interface AppShellProps {
@@ -18,6 +19,9 @@ export function AppShell({ user, children }: AppShellProps) {
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex pb-safe">
       {/* Modal de bienvenida/activación de huella y alertas en móvil */}
       <MobileOnboardingModal user={user} />
+
+      {/* Banner de instalación PWA (solo cuando el usuario ha iniciado sesión) */}
+      <PwaInstallBanner />
 
       {/* Sidebar fijo a la izquierda */}
       <Sidebar

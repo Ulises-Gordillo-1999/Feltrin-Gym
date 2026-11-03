@@ -30,20 +30,34 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   // Estados PWA y Huella Dactilar
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
   const [hasBiometrics, setHasBiometrics] = useState(false);
   const [isBiometricPending, setIsBiometricPending] = useState(false);
   const [biometricError, setBiometricError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Detectar si está instalada en el celular (modo standalone)
+    // 1. Detectar estrictamente si es un dispositivo móvil (smartphone o tablet)
+    const isMobile =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+      (window.matchMedia('(max-width: 768px)').matches && navigator.maxTouchPoints > 0);
+
+    setIsMobileDevice(isMobile);
+
+    // 2. Detectar si está ejecutándose como PWA instalada en el celular
     const standalone =
       window.matchMedia('(display-mode: standalone)').matches ||
       (window.navigator as any).standalone === true;
 
     setIsStandalone(standalone);
 
-    // Verificar si el dispositivo tiene sensor de huella / Face ID
+    // Si NO es móvil, no consultar biometría para que nunca aparezca en computadoras/desktop
+    if (!isMobile) {
+      setHasBiometrics(false);
+      return;
+    }
+
+    // 3. Verificar si el dispositivo móvil tiene sensor de huella / Face ID
     if (
       typeof window !== 'undefined' &&
       window.PublicKeyCredential &&
@@ -129,8 +143,8 @@ export default function LoginPage() {
             </div>
           )}
 
-          {/* Botón Acceso Rápido con Huella Dactilar (exclusivo para PWA instalada o móvil con biometría) */}
-          {(isStandalone || hasBiometrics) && (
+          {/* Botón Acceso Rápido con Huella Dactilar (EXCLUSIVO para dispositivos móviles) */}
+          {isMobileDevice && (isStandalone || hasBiometrics) && (
             <div className="space-y-4 mb-5">
               <button
                 type="button"
