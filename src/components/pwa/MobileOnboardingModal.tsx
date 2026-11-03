@@ -46,6 +46,12 @@ export function MobileOnboardingModal({ user }: { user: SessionUser }) {
         return;
       }
 
+      // Si está en el navegador móvil y no se ha instalado aún, permitir que el usuario vea
+      // e interactúe prioritariamente con el cartel de instalación PWA.
+      if (!isStandalone && !sessionStorage.getItem('feltrin_dismiss_install')) {
+        return;
+      }
+
       // 3. Verificar si el dispositivo soporta sensor biométrico (Huella / TouchID / FaceID)
       let hasPlatformBio = false;
       if (

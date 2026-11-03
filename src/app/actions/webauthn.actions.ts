@@ -10,7 +10,7 @@ import {
   type RegistrationResponseJSON,
   type AuthenticationResponseJSON,
 } from '@simplewebauthn/server';
-import { db } from '@/db';
+import { db, client } from '@/db';
 import { users, userPasskeys, userPushSubscriptions } from '@/db/schema';
 import { getSession, requireSession, createSessionCookie } from '@/utils/session';
 import type { ActionResult } from '@/types';
@@ -22,7 +22,7 @@ let tablesEnsured = false;
 export async function ensureWebAuthnTables(): Promise<void> {
   if (tablesEnsured) return;
   try {
-    await db.execute(sql`
+    await client.unsafe(`
       CREATE TABLE IF NOT EXISTS "user_passkeys" (
         "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
         "user_id" uuid NOT NULL REFERENCES "users"("id") ON DELETE CASCADE,
@@ -340,15 +340,20 @@ export async function savePushSubscriptionAction(subscription: {
  * 6. Verifica si el usuario actual ya tiene alguna huella registrada.
  */
 export async function getUserPasskeysCountAction(): Promise<number> {
-  await ensureWebAuthnTables();
-  const session = await getSession();
-  if (!session) return 0;
+  try {
+    await ensureWebAuthnTables();
+    const session = await getSession();
+    if (!session) return 0;
 
-  const passkeys = await db.query.userPasskeys.findMany({
-    where: eq(userPasskeys.userId, session.id),
-    columns: { id: true },
-  });
+    const passkeys = await db.query.userPasskeys.findMany({
+      where: eq(userPasskeys.userId, session.id),
+      columns: { id: true },
+    });
 
-  return passkeys.length;
+    return passkeys.length;
+  } catch (error) {
+    console.error('Error getUserPasskeysCountAction:', error);
+    return 0;
+  }
 }
 

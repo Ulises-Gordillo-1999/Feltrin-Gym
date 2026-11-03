@@ -4,21 +4,31 @@ import { useEffect } from 'react';
 
 export function PwaRegister() {
   useEffect(() => {
-    // 1. Registrar Service Worker silenciosamente en producción
-    if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
-      window.addEventListener('load', () => {
+    // 1. Registrar Service Worker de forma confiable tanto en producción como en HTTPS
+    if (
+      typeof window !== 'undefined' &&
+      'serviceWorker' in navigator &&
+      (process.env.NODE_ENV === 'production' || window.location.protocol === 'https:')
+    ) {
+      const registerSW = () => {
         navigator.serviceWorker
           .register('/sw.js')
           .then((reg) => {
-            console.log('PWA: Service Worker registrado con alcance:', reg.scope);
+            console.log('PWA: Service Worker registrado exitosamente. Alcance:', reg.scope);
           })
           .catch((err) => {
-            console.error('PWA: Error registrando Service Worker:', err);
+            console.warn('PWA: Error registrando Service Worker:', err);
           });
-      });
+      };
+
+      if (document.readyState === 'complete') {
+        registerSW();
+      } else {
+        window.addEventListener('load', registerSW);
+      }
     }
 
-    // 2. Capturar evento de instalación nativo y guardarlo globalmente
+    // 2. Capturar evento nativo de instalación antes de que se pierda
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       (window as any).__deferredInstallPrompt = e;
@@ -32,6 +42,5 @@ export function PwaRegister() {
     };
   }, []);
 
-  return null; // Cero UI en la raíz para no interferir con la pantalla de login
+  return null;
 }
-

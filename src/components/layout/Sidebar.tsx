@@ -17,6 +17,7 @@ import {
   Settings,
   CalendarCheck,
   Receipt,
+  Download,
   X,
 } from 'lucide-react';
 import type { Role } from '@/types';
@@ -114,6 +115,19 @@ export interface SidebarProps {
 
 export function Sidebar({ role, isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const [isStandalone, setIsStandalone] = React.useState(false);
+
+  React.useEffect(() => {
+    const standalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as any).standalone === true;
+    setIsStandalone(standalone);
+  }, []);
+
+  const handleTriggerInstall = () => {
+    onClose();
+    window.dispatchEvent(new CustomEvent('pwa-open-install'));
+  };
 
   const filteredNav = NAV_ITEMS.filter((item) => item.roles.includes(role));
 
@@ -198,6 +212,20 @@ export function Sidebar({ role, isOpen, onClose }: SidebarProps) {
             );
           })}
         </nav>
+
+        {/* Botón para instalar app en celular */}
+        {!isStandalone && (
+          <div className="px-3 pb-2 pt-1 border-t border-zinc-900">
+            <button
+              type="button"
+              onClick={handleTriggerInstall}
+              className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 transition-all cursor-pointer shadow-sm"
+            >
+              <Download className="w-4 h-4 shrink-0" />
+              <span>Instalar App en el Celular</span>
+            </button>
+          </div>
+        )}
 
         {/* Footer info */}
         <div className="p-4 border-t border-zinc-900 text-center">
