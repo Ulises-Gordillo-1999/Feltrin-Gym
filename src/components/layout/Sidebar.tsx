@@ -124,6 +124,21 @@ export function Sidebar({ role, isOpen, onClose }: SidebarProps) {
     setIsStandalone(standalone);
   }, []);
 
+  React.useEffect(() => {
+    onClose();
+  }, [pathname]);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
   const handleTriggerInstall = () => {
     onClose();
     window.dispatchEvent(new CustomEvent('pwa-open-install'));

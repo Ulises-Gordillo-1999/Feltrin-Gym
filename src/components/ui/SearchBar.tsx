@@ -22,17 +22,18 @@ export function SearchBar({
         <Search className="w-4 h-4" />
       </div>
       <input
-        type="text"
+        type="search"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-xl border border-zinc-800 bg-zinc-900/80 pl-10 pr-9 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all"
+        className="w-full rounded-xl border border-zinc-800 bg-zinc-900/80 pl-10 pr-10 py-2.5 min-h-[44px] text-base md:text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all"
       />
       {value && (
         <button
           type="button"
           onClick={() => onChange('')}
-          className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-400 hover:text-zinc-100 cursor-pointer"
+          aria-label="Borrar búsqueda"
+          className="absolute inset-y-0 right-0 pr-3 flex items-center justify-center text-zinc-400 hover:text-zinc-100 cursor-pointer min-h-[44px] min-w-[44px]"
         >
           <X className="w-4 h-4" />
         </button>

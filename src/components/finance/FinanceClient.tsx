@@ -268,15 +268,92 @@ export function FinanceClient({
         </div>
       </div>
 
-      {/* Tabla de Movimientos */}
+      {/* Tabla y Tarjetas de Movimientos (Patrón Híbrido Responsivo) */}
       <Card className="p-0 overflow-hidden">
         {filteredTransactions.length === 0 ? (
           <div className="py-16 text-center text-zinc-400 text-sm">
             No se encontraron movimientos registrados con los filtros aplicados.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm border-collapse">
+          <>
+            {/* VISTA MÓVIL: Tarjetas de Movimientos (< md) */}
+            <div className="grid grid-cols-1 gap-3 p-3 md:hidden">
+              {filteredTransactions.map((tx) => {
+                const isIncome = tx.type === 'INGRESO';
+                const isVoid = tx.status === 'ANULADO';
+                return (
+                  <div
+                    key={tx.id}
+                    className={`p-4 rounded-2xl bg-zinc-900/70 border border-zinc-800/80 shadow-sm space-y-3 transition-all ${
+                      isVoid ? 'opacity-50 line-through' : ''
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={isIncome ? 'emerald' : 'rose'} size="sm">
+                            {isIncome ? 'Ingreso' : 'Egreso'}
+                          </Badge>
+                          <span className="text-xs font-semibold text-zinc-200">
+                            {tx.categoryName}
+                          </span>
+                        </div>
+                        <p className="text-xs text-zinc-100 font-medium mt-1">
+                          {tx.description}
+                        </p>
+                      </div>
+
+                      <span
+                        className={`text-base font-extrabold tracking-tight shrink-0 ${
+                          isIncome ? 'text-emerald-400' : 'text-rose-400'
+                        }`}
+                      >
+                        {isIncome ? '+' : '-'}
+                        {formatCurrency(tx.amount)}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between text-[11px] text-zinc-400 pt-2 border-t border-zinc-800/60">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono">{formatDateTime(tx.occurredAt)}</span>
+                        <span>•</span>
+                        <span>{tx.paymentMethod.replace('_', ' ')}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {tx.receiptImageUrl && (
+                          <a
+                            href={tx.receiptImageUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 text-sky-400 hover:text-sky-300 font-semibold"
+                          >
+                            <ImageIcon className="w-3.5 h-3.5" />
+                            <span>Foto</span>
+                          </a>
+                        )}
+                        {!isVoid && !tx.isAutomatic && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setVoidTxId(tx.id);
+                              setVoidReason('');
+                            }}
+                            className="p-1 rounded text-zinc-400 hover:text-rose-400 transition-colors"
+                            title="Anular"
+                          >
+                            <AlertOctagon className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* VISTA DESKTOP: Tabla Tradicional (>= md) */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-sm border-collapse">
               <thead>
                 <tr className="border-b border-zinc-800 bg-zinc-900/60 text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
                   <th className="py-3 px-4">Fecha / Hora</th>
@@ -375,7 +452,8 @@ export function FinanceClient({
               </tbody>
             </table>
           </div>
-        )}
+        </>
+      )}
       </Card>
 
       {/* Modal Desacoplado: Registrar Movimiento */}

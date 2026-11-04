@@ -246,15 +246,112 @@ export function InventoryClient({
         </div>
       </div>
 
-      {/* Tabla de Productos */}
+      {/* Tabla y Tarjetas de Productos (Patrón Híbrido Responsivo) */}
       <Card className="p-0 overflow-hidden">
         {filteredProducts.length === 0 ? (
           <div className="py-16 text-center text-zinc-400 text-sm">
             No se encontraron artículos en el inventario.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm border-collapse">
+          <>
+            {/* VISTA MÓVIL: Tarjetas de Productos (< md) */}
+            <div className="grid grid-cols-1 gap-3 p-3 md:hidden">
+              {filteredProducts.map((p) => {
+                const isLow = p.stock <= p.minStock;
+                return (
+                  <div
+                    key={p.id}
+                    className="p-4 rounded-2xl bg-zinc-900/70 border border-zinc-800/80 shadow-sm space-y-3 transition-all"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-12 h-12 rounded-xl bg-zinc-800 border border-zinc-700/80 flex items-center justify-center text-zinc-400 shrink-0 overflow-hidden">
+                          {p.imageUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <Package className="w-5 h-5" />
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <span className="font-bold text-sm text-zinc-100 truncate block">
+                            {p.name}
+                          </span>
+                          <span className="font-mono text-xs text-zinc-400">SKU: {p.sku}</span>
+                        </div>
+                      </div>
+
+                      <Badge variant={isLow ? 'rose' : 'emerald'} size="sm" dot>
+                        {p.stock} un.
+                      </Badge>
+                    </div>
+
+                    {/* Precios y Alerta de Stock */}
+                    <div className="grid grid-cols-2 gap-2 text-xs bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-900">
+                      <div>
+                        <span className="text-[10px] text-zinc-500 uppercase font-semibold block">Precio Venta</span>
+                        <span className="text-sm font-bold text-emerald-400 font-mono">
+                          {formatCurrency(p.salePrice)}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-zinc-500 uppercase font-semibold block">Costo / Categoría</span>
+                        <span className="text-zinc-300 font-medium block truncate">
+                          {formatCurrency(p.costPrice)} • {p.categoryName}
+                        </span>
+                      </div>
+                    </div>
+
+                    {isLow && (
+                      <div className="text-xs text-rose-400 font-medium flex items-center gap-1.5 px-2 py-1 bg-rose-950/30 border border-rose-900/40 rounded-lg">
+                        <span>⚠️ Stock bajo (mínimo recomendado: {p.minStock} unidades)</span>
+                      </div>
+                    )}
+
+                    {/* Acciones */}
+                    <div className="flex items-center justify-end gap-2 pt-1 border-t border-zinc-800/60">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setAdjustError(null);
+                          setAdjustingProduct(p);
+                        }}
+                        icon={<ArrowUpDown className="w-3.5 h-3.5" />}
+                      >
+                        Ajustar Stock
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditingProduct(p)}
+                        icon={<Pencil className="w-3.5 h-3.5 text-zinc-300" />}
+                      >
+                        Editar
+                      </Button>
+
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => {
+                          setDeletingProduct(p);
+                          setDeleteStep(1);
+                          setDeleteError(null);
+                        }}
+                        icon={<Trash2 className="w-3.5 h-3.5 text-rose-300" />}
+                      >
+                        <span className="sr-only">Eliminar</span>
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* VISTA DESKTOP: Tabla Tradicional (>= md) */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-sm border-collapse">
               <thead>
                 <tr className="border-b border-zinc-800 bg-zinc-900/60 text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
                   <th className="py-3 px-4">Artículo / SKU</th>
@@ -356,7 +453,8 @@ export function InventoryClient({
               </tbody>
             </table>
           </div>
-        )}
+        </>
+      )}
       </Card>
 
       {/* Modal Desacoplado: Alta de Producto */}

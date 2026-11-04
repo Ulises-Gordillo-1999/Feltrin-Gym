@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
+import { BottomNav } from './BottomNav';
 import { MobileOnboardingModal } from '@/components/pwa/MobileOnboardingModal';
 import { PwaInstallBanner } from '@/components/pwa/PwaInstallBanner';
 import type { SessionUser } from '@/types';
@@ -34,10 +35,13 @@ export function AppShell({ user, children }: AppShellProps) {
       <div className="flex-1 flex flex-col min-w-0 lg:pl-64">
         <Topbar user={user} onOpenSidebar={() => setSidebarOpen(true)} />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto pb-24 lg:pb-8">
           {children}
         </main>
       </div>
+
+      {/* Barra de navegación inferior nativa para móviles */}
+      <BottomNav role={user.role} onOpenMenu={() => setSidebarOpen(true)} />
     </div>
   );
 }

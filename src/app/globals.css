@@ -68,6 +68,15 @@ dialog::backdrop {
   }
 }
 
+/* Utilidad para ocultar barras de scroll en carruseles táctiles horizontales */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 @media screen and (max-width: 768px) {
   input, select, textarea {
     font-size: 16px !important;

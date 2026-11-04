@@ -83,17 +83,17 @@ export function AdminDashboard({
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="grid grid-cols-2 gap-2.5 w-full sm:flex sm:items-center sm:w-auto">
           <Link
             href="/alumnos"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold text-sm transition-all shadow-lg shadow-emerald-950/40"
+            className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold text-xs sm:text-sm transition-all shadow-lg shadow-emerald-950/40 min-h-[44px]"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
             <span>Nuevo Alumno</span>
           </Link>
           <Link
             href="/finanzas"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-750 text-zinc-100 font-medium text-sm border border-zinc-700/80 transition-all"
+            className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-750 text-zinc-100 font-medium text-xs sm:text-sm border border-zinc-700/80 transition-all min-h-[44px]"
           >
             <CreditCard className="w-4 h-4 text-emerald-400" />
             <span>Caja / Gastos</span>
@@ -272,7 +272,7 @@ export function AdminDashboard({
                                 expiresAt: st.membershipExpiresAt,
                               })
                             }
-                            className="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 hover:border-emerald-500/50 text-emerald-400 hover:text-emerald-300 transition-all duration-150 cursor-pointer shadow-sm hover:scale-105 active:scale-95"
+                            className="inline-flex items-center justify-center w-9 h-9 min-h-[38px] min-w-[38px] rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 hover:border-emerald-500/50 text-emerald-400 hover:text-emerald-300 transition-all duration-150 cursor-pointer shadow-sm active:scale-95"
                             title="Enviar mensaje por WhatsApp"
                           >
                             <MessageCircle className="w-4 h-4" />
@@ -280,7 +280,7 @@ export function AdminDashboard({
 
                           <Link
                             href={`/alumnos/${st.id}`}
-                            className="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-zinc-800/80 hover:bg-zinc-700/80 border border-zinc-700/60 text-zinc-300 hover:text-zinc-100 transition-all duration-150 shadow-sm hover:scale-105 active:scale-95"
+                            className="inline-flex items-center justify-center w-9 h-9 min-h-[38px] min-w-[38px] rounded-xl bg-zinc-800/80 hover:bg-zinc-700/80 border border-zinc-700/60 text-zinc-300 hover:text-zinc-100 transition-all duration-150 shadow-sm active:scale-95"
                             title="Ver ficha / Cobrar cuota"
                           >
                             <ArrowRight className="w-4 h-4" />

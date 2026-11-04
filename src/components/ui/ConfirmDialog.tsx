@@ -52,12 +52,12 @@ export function ConfirmDialog({
         </div>
       </div>
 
-      <div className="mt-6 flex items-center justify-end gap-3 pt-4 border-t border-zinc-800/80">
+      <div className="mt-6 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2.5 pt-4 border-t border-zinc-800/80">
         <button
           type="button"
           onClick={onClose}
           disabled={isLoading}
-          className="px-4 py-2 text-sm font-medium text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800/80 rounded-xl transition-colors cursor-pointer disabled:opacity-50"
+          className="w-full sm:w-auto px-4 py-2.5 text-sm font-medium text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800/80 rounded-xl transition-colors cursor-pointer disabled:opacity-50 min-h-[44px] flex items-center justify-center"
         >
           {cancelText}
         </button>
@@ -65,7 +65,7 @@ export function ConfirmDialog({
           type="button"
           onClick={onConfirm}
           disabled={isLoading}
-          className={`px-4 py-2 text-sm font-semibold rounded-xl transition-colors shadow-lg cursor-pointer disabled:opacity-50 flex items-center gap-2 ${
+          className={`w-full sm:w-auto px-4 py-2.5 text-sm font-semibold rounded-xl transition-colors shadow-lg cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2 min-h-[44px] ${
             isDanger
               ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-900/40'
               : 'bg-amber-600 hover:bg-amber-500 text-white shadow-amber-900/40'

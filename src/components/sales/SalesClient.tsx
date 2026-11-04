@@ -257,7 +257,8 @@ export function SalesClient({
         </div>
 
         {/* Carrito de Compra (1 col) */}
-        <Card className="flex flex-col justify-between h-full bg-zinc-900/80 border-zinc-800">
+        <div id="pos-cart" className="scroll-mt-20">
+          <Card className="flex flex-col justify-between h-full bg-zinc-900/80 border-zinc-800">
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
               <div className="flex items-center gap-2">
@@ -382,7 +383,34 @@ export function SalesClient({
             </Button>
           </div>
         </Card>
+        </div>
       </div>
+
+      {/* Floating Sticky Cart Pill para dispositivos móviles */}
+      {cart.length > 0 && (
+        <div className="fixed bottom-20 inset-x-4 z-20 lg:hidden animate-in fade-in slide-in-from-bottom-3 duration-200">
+          <button
+            type="button"
+            onClick={() => {
+              document.getElementById('pos-cart')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+            className="w-full flex items-center justify-between p-3.5 bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-zinc-950 font-bold rounded-2xl shadow-xl shadow-emerald-950/60 cursor-pointer transition-all border border-emerald-400/50"
+          >
+            <div className="flex items-center gap-2">
+              <ShoppingBag className="w-5 h-5 stroke-[2.5]" />
+              <span className="text-xs">
+                {cart.reduce((acc, i) => acc + i.quantity, 0)} artículos en carrito
+              </span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <span className="font-extrabold">{formatCurrency(cartTotal)}</span>
+              <span className="text-xs bg-zinc-950 text-emerald-400 px-2 py-0.5 rounded-lg">
+                Cobrar →
+              </span>
+            </div>
+          </button>
+        </div>
+      )}
 
       {/* Historial de Ventas Recientes */}
       <Card className="p-0 overflow-hidden">
@@ -400,54 +428,49 @@ export function SalesClient({
             No se han registrado ventas todavía.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm border-collapse">
-              <thead>
-                <tr className="border-b border-zinc-800 bg-zinc-900/60 text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
-                  <th className="py-3 px-4">Ticket N°</th>
-                  <th className="py-3 px-4">Fecha</th>
-                  <th className="py-3 px-4">Cliente</th>
-                  <th className="py-3 px-4">Artículos</th>
-                  <th className="py-3 px-4">Método</th>
-                  <th className="py-3 px-4 text-right">Total</th>
-                  <th className="py-3 px-4">Estado</th>
-                  <th className="py-3 px-4 text-right">Acción</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-800/60">
-                {salesHistory.map((s) => {
-                  const isVoid = s.status === 'ANULADO';
-                  return (
-                    <tr
-                      key={s.id}
-                      className={`hover:bg-zinc-900/40 transition-colors ${
-                        isVoid ? 'opacity-50 line-through' : ''
-                      }`}
-                    >
-                      <td className="py-3 px-4 font-mono font-bold text-xs text-zinc-300">
-                        #{String(s.saleNumber).padStart(6, '0')}
-                      </td>
-                      <td className="py-3 px-4 text-xs text-zinc-400">
-                        {formatDateTime(s.soldAt)}
-                      </td>
-                      <td className="py-3 px-4 font-semibold text-zinc-200">
-                        {s.customerName}
-                      </td>
-                      <td className="py-3 px-4 text-xs text-zinc-400 max-w-xs truncate">
-                        {s.itemsSummary}
-                      </td>
-                      <td className="py-3 px-4 text-xs text-zinc-400">
-                        {s.paymentMethod.replace('_', ' ')}
-                      </td>
-                      <td className="py-3 px-4 text-right font-bold text-emerald-400 text-sm">
+          <>
+            {/* VISTA MÓVIL: Tarjetas de Tickets (< md) */}
+            <div className="grid grid-cols-1 gap-3 p-3 md:hidden">
+              {salesHistory.map((s) => {
+                const isVoid = s.status === 'ANULADO';
+                return (
+                  <div
+                    key={s.id}
+                    className={`p-4 rounded-2xl bg-zinc-900/70 border border-zinc-800/80 shadow-sm space-y-3 transition-all ${
+                      isVoid ? 'opacity-50 line-through' : ''
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-bold text-xs text-zinc-300">
+                            #{String(s.saleNumber).padStart(6, '0')}
+                          </span>
+                          <span className="text-xs text-zinc-400 font-medium">
+                            • {s.customerName}
+                          </span>
+                        </div>
+                        <p className="text-xs text-zinc-400 mt-1 line-clamp-2">
+                          {s.itemsSummary}
+                        </p>
+                      </div>
+
+                      <span className="text-base font-extrabold text-emerald-400 font-mono shrink-0">
                         {formatCurrency(s.total)}
-                      </td>
-                      <td className="py-3 px-4">
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between text-[11px] text-zinc-400 pt-2 border-t border-zinc-800/60">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono">{formatDateTime(s.soldAt)}</span>
+                        <span>•</span>
+                        <span>{s.paymentMethod.replace('_', ' ')}</span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
                         <Badge variant={isVoid ? 'rose' : 'emerald'} size="sm" dot>
                           {s.status}
                         </Badge>
-                      </td>
-                      <td className="py-3 px-4 text-right">
                         {!isVoid && (
                           <button
                             type="button"
@@ -455,19 +478,89 @@ export function SalesClient({
                               setVoidSaleId(s.id);
                               setVoidReason('');
                             }}
-                            className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-400 hover:bg-rose-950/30 transition-colors cursor-pointer"
-                            title="Anular venta y restaurar stock"
+                            className="p-1 rounded text-zinc-400 hover:text-rose-400 transition-colors"
+                            title="Anular venta"
                           >
-                            <AlertOctagon className="w-4 h-4" />
+                            <AlertOctagon className="w-3.5 h-3.5" />
                           </button>
                         )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* VISTA DESKTOP: Tabla Tradicional (>= md) */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-sm border-collapse">
+                <thead>
+                  <tr className="border-b border-zinc-800 bg-zinc-900/60 text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
+                    <th className="py-3 px-4">Ticket N°</th>
+                    <th className="py-3 px-4">Fecha</th>
+                    <th className="py-3 px-4">Cliente</th>
+                    <th className="py-3 px-4">Artículos</th>
+                    <th className="py-3 px-4">Método</th>
+                    <th className="py-3 px-4 text-right">Total</th>
+                    <th className="py-3 px-4">Estado</th>
+                    <th className="py-3 px-4 text-right">Acción</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-800/60">
+                  {salesHistory.map((s) => {
+                    const isVoid = s.status === 'ANULADO';
+                    return (
+                      <tr
+                        key={s.id}
+                        className={`hover:bg-zinc-900/40 transition-colors ${
+                          isVoid ? 'opacity-50 line-through' : ''
+                        }`}
+                      >
+                        <td className="py-3 px-4 font-mono font-bold text-xs text-zinc-300">
+                          #{String(s.saleNumber).padStart(6, '0')}
+                        </td>
+                        <td className="py-3 px-4 text-xs text-zinc-400">
+                          {formatDateTime(s.soldAt)}
+                        </td>
+                        <td className="py-3 px-4 font-semibold text-zinc-200">
+                          {s.customerName}
+                        </td>
+                        <td className="py-3 px-4 text-xs text-zinc-400 max-w-xs truncate">
+                          {s.itemsSummary}
+                        </td>
+                        <td className="py-3 px-4 text-xs text-zinc-400">
+                          {s.paymentMethod.replace('_', ' ')}
+                        </td>
+                        <td className="py-3 px-4 text-right font-bold text-emerald-400 text-sm">
+                          {formatCurrency(s.total)}
+                        </td>
+                        <td className="py-3 px-4">
+                          <Badge variant={isVoid ? 'rose' : 'emerald'} size="sm" dot>
+                            {s.status}
+                          </Badge>
+                        </td>
+                        <td className="py-3 px-4 text-right">
+                          {!isVoid && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setVoidSaleId(s.id);
+                                setVoidReason('');
+                              }}
+                              className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-400 hover:bg-rose-950/30 transition-colors cursor-pointer"
+                              title="Anular venta y restaurar stock"
+                            >
+                              <AlertOctagon className="w-4 h-4" />
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </Card>
 

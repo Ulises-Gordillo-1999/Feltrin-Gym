@@ -165,15 +165,114 @@ export function StudentsListClient({
         </div>
       </div>
 
-      {/* Tabla de Alumnos */}
+      {/* Tabla y Tarjetas de Alumnos (Patrón Híbrido Responsivo) */}
       <Card className="p-0 overflow-hidden">
         {filteredStudents.length === 0 ? (
           <div className="py-16 text-center text-zinc-400 text-sm">
             No se encontraron alumnos que coincidan con la búsqueda o filtro aplicado.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm border-collapse">
+          <>
+            {/* VISTA MÓVIL: Tarjetas Interactivas (< md) */}
+            <div className="grid grid-cols-1 gap-3 p-3 md:hidden">
+              {filteredStudents.map((st) => {
+                const statusInfo = getMembershipStatus(st.membershipExpiresAt);
+                return (
+                  <div
+                    key={st.id}
+                    className="p-4 rounded-2xl bg-zinc-900/70 border border-zinc-800/80 hover:border-zinc-700 shadow-sm space-y-3 transition-all"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <Link
+                        href={`/alumnos/${st.id}`}
+                        className="flex items-center gap-3 flex-1 min-w-0"
+                      >
+                        <div className="w-11 h-11 rounded-full bg-zinc-800 border border-zinc-700/80 flex items-center justify-center text-zinc-300 font-semibold text-xs overflow-hidden shrink-0">
+                          {st.photoUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={st.photoUrl}
+                              alt={st.firstName}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <User className="w-5 h-5 text-zinc-400" />
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <h3 className="font-bold text-sm text-zinc-100 truncate hover:text-emerald-400 transition-colors">
+                            {st.lastName}, {st.firstName}
+                          </h3>
+                          <p className="text-xs text-zinc-400 font-mono mt-0.5">DNI {st.dni}</p>
+                        </div>
+                      </Link>
+
+                      <Badge
+                        variant={
+                          statusInfo.status === 'AL_DIA'
+                            ? 'emerald'
+                            : statusInfo.status === 'POR_VENCER'
+                            ? 'amber'
+                            : statusInfo.status === 'EN_GRACIA'
+                            ? 'orange'
+                            : 'rose'
+                        }
+                        dot
+                        size="sm"
+                      >
+                        {statusInfo.label}
+                      </Badge>
+                    </div>
+
+                    {/* Fila de Plan y Vencimiento */}
+                    <div className="grid grid-cols-2 gap-2 text-xs bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-900">
+                      <div>
+                        <span className="text-[10px] text-zinc-500 uppercase font-semibold block">Plan Actual</span>
+                        <span className="text-zinc-200 font-medium truncate block">
+                          {st.currentPlanName || 'Sin plan'}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-zinc-500 uppercase font-semibold block">Vencimiento</span>
+                        <span className="text-zinc-200 font-medium block">
+                          {formatDate(st.membershipExpiresAt)}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Acciones de la tarjeta */}
+                    <div className="flex items-center justify-between pt-1">
+                      <div className="text-[11px] text-zinc-400">
+                        {st.trainerName ? `Profe: ${st.trainerName}` : ''}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {st.phone && (
+                          <button
+                            type="button"
+                            onClick={() => setSelectedStudentForWa(st)}
+                            className="px-2.5 py-1.5 rounded-xl text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer min-h-[38px]"
+                          >
+                            <MessageCircle className="w-3.5 h-3.5" />
+                            <span>WhatsApp</span>
+                          </button>
+                        )}
+                        <Link
+                          href={`/alumnos/${st.id}`}
+                          className="px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium flex items-center gap-1 transition-colors min-h-[38px]"
+                        >
+                          <span>Ficha</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* VISTA DESKTOP: Tabla Tradicional (>= md) */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-sm border-collapse">
               <thead>
                 <tr className="border-b border-zinc-800 bg-zinc-900/60 text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
                   <th className="py-3 px-4">Alumno</th>
@@ -292,7 +391,8 @@ export function StudentsListClient({
               </tbody>
             </table>
           </div>
-        )}
+        </>
+      )}
       </Card>
 
       {/* Modal Desacoplado con React Portal: Alta de Alumno */}
