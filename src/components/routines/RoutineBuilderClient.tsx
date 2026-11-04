@@ -97,6 +97,8 @@ export function RoutineBuilderClient({
 
   const [isSavePending, startSaveTransition] = useTransition();
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [assignFeedback, setAssignFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const currentDayData = daysState[selectedDay];
 
@@ -179,15 +181,18 @@ export function RoutineBuilderClient({
 
       if (res.ok) {
         setSaveSuccess(true);
-        setTimeout(() => setSaveSuccess(false), 3000);
+        setSaveError(null);
+        setTimeout(() => setSaveSuccess(false), 3500);
       } else {
-        alert(res.error);
+        setSaveError(res.error);
+        setTimeout(() => setSaveError(null), 5000);
       }
     });
   };
 
   const handleAssignToStudent = () => {
     if (!assignStudentId) return;
+    setAssignFeedback(null);
     startAssignTransition(async () => {
       const res = await assignRoutineToStudentAction(
         routine.id,
@@ -196,9 +201,10 @@ export function RoutineBuilderClient({
       );
       if (res.ok) {
         setIsAssignModalOpen(false);
-        alert('¡Rutina asignada exitosamente al alumno!');
+        setAssignFeedback({ type: 'success', message: '¡Rutina asignada exitosamente al alumno!' });
+        setTimeout(() => setAssignFeedback(null), 4000);
       } else {
-        alert(res.error);
+        setAssignFeedback({ type: 'error', message: res.error });
       }
     });
   };
@@ -206,21 +212,21 @@ export function RoutineBuilderClient({
   return (
     <div className="space-y-8">
       {/* Top navigation */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <Link
           href="/rutinas"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-zinc-400 hover:text-zinc-100 transition-colors"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-zinc-400 hover:text-zinc-100 transition-colors py-1"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Volver al catálogo de rutinas</span>
         </Link>
 
-        <div className="flex items-center gap-3">
+        <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
           <a
             href={`/api/pdf/routine/${routine.id}`}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold transition-colors border border-zinc-700"
+            className="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs font-semibold transition-colors border border-zinc-800 min-h-[44px] sm:min-h-0"
           >
             <Download className="w-4 h-4 text-emerald-400" />
             <span>Exportar PDF</span>
@@ -231,11 +237,39 @@ export function RoutineBuilderClient({
             size="sm"
             onClick={() => setIsAssignModalOpen(true)}
             icon={<UserCheck className="w-4 h-4" />}
+            className="w-full sm:w-auto min-h-[44px] sm:min-h-0"
           >
             Asignar a Alumno
           </Button>
         </div>
       </div>
+
+      {assignFeedback && (
+        <div
+          className={`p-3.5 rounded-xl text-xs font-semibold flex items-center justify-between border ${
+            assignFeedback.type === 'success'
+              ? 'bg-emerald-950/60 border-emerald-800/80 text-emerald-300'
+              : 'bg-rose-950/60 border-rose-800/80 text-rose-300'
+          }`}
+        >
+          <span>{assignFeedback.message}</span>
+          <button
+            onClick={() => setAssignFeedback(null)}
+            className="text-zinc-400 hover:text-zinc-200 ml-2"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {saveError && (
+        <div className="p-3.5 rounded-xl bg-rose-950/60 border border-rose-800/80 text-rose-300 text-xs font-semibold flex items-center justify-between">
+          <span>{saveError}</span>
+          <button onClick={() => setSaveError(null)} className="text-rose-400 hover:text-rose-200 ml-2">
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* Routine Metadata Card */}
       <Card>
@@ -262,7 +296,7 @@ export function RoutineBuilderClient({
       </Card>
 
       {/* Selector de Días de la Semana */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2">
+      <div className="-mx-4 px-4 sm:mx-0 sm:px-0 flex items-center gap-2 overflow-x-auto scrollbar-none snap-x pb-2">
         {DAYS_OF_WEEK.map((day) => {
           const exCount = daysState[day].exercises.length;
           const isSelected = selectedDay === day;
@@ -271,9 +305,9 @@ export function RoutineBuilderClient({
               key={day}
               type="button"
               onClick={() => setSelectedDay(day)}
-              className={`px-4 py-3 rounded-2xl border text-left shrink-0 transition-all cursor-pointer min-w-[130px] ${
+              className={`px-4 py-3 rounded-2xl border text-left shrink-0 snap-start transition-all cursor-pointer min-w-[130px] min-h-[44px] ${
                 isSelected
-                  ? 'bg-emerald-500/15 border-emerald-500/50 shadow-lg shadow-emerald-950/40 text-emerald-300'
+                  ? 'bg-emerald-500/15 border-emerald-500/50 shadow-lg shadow-emerald-950/40 text-emerald-300 ring-1 ring-emerald-500/30'
                   : 'bg-zinc-900/60 border-zinc-800/80 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60'
               }`}
             >
@@ -293,7 +327,7 @@ export function RoutineBuilderClient({
 
       {/* Editor del Día Seleccionado */}
       <Card className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-zinc-800 gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-zinc-800 gap-3">
           <div className="flex-1 max-w-md">
             <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1">
               Nombre o Enfoque del {selectedDay}
@@ -303,16 +337,17 @@ export function RoutineBuilderClient({
               value={currentDayData.title}
               onChange={(e) => handleTitleChange(e.target.value)}
               placeholder="Ej. Pecho, Hombros y Tríceps (Fuerza)"
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-900/90 px-3.5 py-2 text-sm text-zinc-100 font-semibold focus:outline-none focus:border-emerald-500"
+              className="w-full rounded-xl border border-zinc-800 bg-zinc-900/90 px-3.5 py-2 text-base sm:text-sm text-zinc-100 font-semibold focus:outline-none focus:border-emerald-500"
             />
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
             <Button
               variant="outline"
               size="sm"
               onClick={handleAddExercise}
               icon={<Plus className="w-4 h-4" />}
+              className="w-full min-h-[44px] sm:min-h-0"
             >
               Agregar Ejercicio
             </Button>
@@ -323,6 +358,7 @@ export function RoutineBuilderClient({
               onClick={handleSaveDay}
               isLoading={isSavePending}
               icon={<Save className="w-4 h-4" />}
+              className="w-full min-h-[44px] sm:min-h-0"
             >
               Guardar {selectedDay}
             </Button>
@@ -389,7 +425,7 @@ export function RoutineBuilderClient({
                   </div>
 
                   {/* Campos técnicos: series, reps, carga, pausa, tempo, notas */}
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs">
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 text-xs">
                     <div>
                       <label className="block text-[10px] font-semibold text-zinc-400 uppercase mb-1">
                         Series
@@ -397,9 +433,10 @@ export function RoutineBuilderClient({
                       <input
                         type="number"
                         min="1"
+                        inputMode="numeric"
                         value={ex.sets}
                         onChange={(e) => handleExerciseChange(index, 'sets', parseInt(e.target.value, 10))}
-                        className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-2.5 py-1.5 text-zinc-100 font-bold focus:outline-none focus:border-emerald-500"
+                        className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-2.5 py-1.5 text-base sm:text-xs text-zinc-100 font-bold focus:outline-none focus:border-emerald-500"
                       />
                     </div>
 
@@ -412,7 +449,7 @@ export function RoutineBuilderClient({
                         value={ex.reps}
                         onChange={(e) => handleExerciseChange(index, 'reps', e.target.value)}
                         placeholder="8-10 / AMRAP"
-                        className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-2.5 py-1.5 text-zinc-100 font-medium focus:outline-none focus:border-emerald-500"
+                        className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-2.5 py-1.5 text-base sm:text-xs text-zinc-100 font-medium focus:outline-none focus:border-emerald-500"
                       />
                     </div>
 
@@ -425,7 +462,7 @@ export function RoutineBuilderClient({
                         value={ex.load || ''}
                         onChange={(e) => handleExerciseChange(index, 'load', e.target.value)}
                         placeholder="60 kg / RPE 8"
-                        className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-2.5 py-1.5 text-zinc-100 font-medium focus:outline-none focus:border-emerald-500"
+                        className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-2.5 py-1.5 text-base sm:text-xs text-zinc-100 font-medium focus:outline-none focus:border-emerald-500"
                       />
                     </div>
 
@@ -436,14 +473,15 @@ export function RoutineBuilderClient({
                       <input
                         type="number"
                         step="15"
+                        inputMode="numeric"
                         value={ex.restSeconds || ''}
                         onChange={(e) => handleExerciseChange(index, 'restSeconds', parseInt(e.target.value, 10) || null)}
                         placeholder="60s / 90s"
-                        className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-2.5 py-1.5 text-zinc-100 font-medium focus:outline-none focus:border-emerald-500"
+                        className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-2.5 py-1.5 text-base sm:text-xs text-zinc-100 font-medium focus:outline-none focus:border-emerald-500"
                       />
                     </div>
 
-                    <div>
+                    <div className="col-span-2 sm:col-span-1">
                       <label className="block text-[10px] font-semibold text-zinc-400 uppercase mb-1">
                         Tempo
                       </label>
@@ -452,7 +490,7 @@ export function RoutineBuilderClient({
                         value={ex.tempo || ''}
                         onChange={(e) => handleExerciseChange(index, 'tempo', e.target.value)}
                         placeholder="3-0-1-0"
-                        className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-2.5 py-1.5 text-zinc-100 font-medium focus:outline-none focus:border-emerald-500"
+                        className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-2.5 py-1.5 text-base sm:text-xs text-zinc-100 font-medium focus:outline-none focus:border-emerald-500"
                       />
                     </div>
                   </div>
@@ -462,7 +500,7 @@ export function RoutineBuilderClient({
                     value={ex.notes || ''}
                     onChange={(e) => handleExerciseChange(index, 'notes', e.target.value)}
                     placeholder="Instrucciones o recomendaciones específicas para este ejercicio..."
-                    className="w-full rounded-lg border border-zinc-800 bg-zinc-950/80 px-2.5 py-1.5 text-xs text-zinc-300 placeholder-zinc-500 focus:outline-none focus:border-emerald-500 italic"
+                    className="w-full rounded-lg border border-zinc-800 bg-zinc-950/80 px-2.5 py-1.5 text-base sm:text-xs text-zinc-300 placeholder-zinc-500 focus:outline-none focus:border-emerald-500 italic"
                   />
                 </div>
               ))}

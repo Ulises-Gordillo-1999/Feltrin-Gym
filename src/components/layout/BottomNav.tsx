@@ -111,3 +111,4 @@ export function BottomNav({ role, onOpenMenu }: BottomNavProps) {
     </nav>
   );
 }
+

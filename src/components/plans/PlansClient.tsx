@@ -1,14 +1,18 @@
 'use client';
 
 import React, { useState, useActionState, useEffect, useTransition } from 'react';
-import { Plus, CreditCard, Check, X, Edit2, Calendar } from 'lucide-react';
+import { Plus, CreditCard, Calendar, Edit2, CheckCircle2, ShieldCheck, Sparkles } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
-import { createPlanAction, updatePlanAction, togglePlanStatusAction } from '@/app/actions/plans.actions';
+import {
+  createPlanAction,
+  updatePlanAction,
+  togglePlanStatusAction,
+} from '@/app/actions/plans.actions';
 import { IDLE } from '@/types';
 import { formatCurrency } from '@/utils/format';
 
@@ -26,23 +30,29 @@ export interface PlanItem {
 export function PlansClient({ plans }: { plans: PlanItem[] }) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<PlanItem | null>(null);
-  const [isTogglePending, startToggleTransition] = useTransition();
 
   const [createState, formCreateAction, isCreatePending] = useActionState(
     createPlanAction,
     IDLE,
   );
+
   const [updateState, formUpdateAction, isUpdatePending] = useActionState(
     updatePlanAction,
     IDLE,
   );
 
+  const [isTogglePending, startToggleTransition] = useTransition();
+
   useEffect(() => {
-    if (createState.status === 'success') setIsCreateModalOpen(false);
+    if (createState.status === 'success') {
+      setIsCreateModalOpen(false);
+    }
   }, [createState.status]);
 
   useEffect(() => {
-    if (updateState.status === 'success') setEditingPlan(null);
+    if (updateState.status === 'success') {
+      setEditingPlan(null);
+    }
   }, [updateState.status]);
 
   const handleToggleActive = (plan: PlanItem) => {
@@ -53,6 +63,7 @@ export function PlansClient({ plans }: { plans: PlanItem[] }) {
 
   return (
     <div className="space-y-6">
+      {/* Header Compacto y Responsivo */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-zinc-100">
@@ -67,60 +78,65 @@ export function PlansClient({ plans }: { plans: PlanItem[] }) {
           variant="primary"
           onClick={() => setIsCreateModalOpen(true)}
           icon={<Plus className="w-4 h-4 stroke-[2.5]" />}
+          className="w-full sm:w-auto"
         >
           Nuevo Plan
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Grid de Planes */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {plans.map((p) => (
-          <Card
+          <div
             key={p.id}
-            hover
-            className={`flex flex-col justify-between ${
-              !p.isActive ? 'opacity-60 border-zinc-900 bg-zinc-950/60' : ''
+            className={`p-5 rounded-2xl border flex flex-col justify-between space-y-4 transition-all ${
+              p.isActive
+                ? 'bg-zinc-900/70 border-zinc-800/80 hover:border-emerald-500/40 shadow-sm'
+                : 'opacity-60 border-zinc-900 bg-zinc-950/60'
             }`}
           >
             <div>
-              <div className="flex items-start justify-between gap-2 pb-3 border-b border-zinc-800">
-                <div>
-                  <h3 className="text-lg font-bold text-zinc-100">{p.name}</h3>
-                  <Badge variant={p.isActive ? 'emerald' : 'zinc'} size="sm" dot>
-                    {p.isActive ? 'Activo' : 'Desactivado'}
-                  </Badge>
+              <div className="flex items-start justify-between gap-2 pb-3 border-b border-zinc-800/60">
+                <div className="min-w-0">
+                  <h3 className="text-base font-bold text-zinc-100 truncate">{p.name}</h3>
+                  <div className="mt-1">
+                    <Badge variant={p.isActive ? 'emerald' : 'zinc'} size="sm" dot>
+                      {p.isActive ? 'Activo' : 'Desactivado'}
+                    </Badge>
+                  </div>
                 </div>
-                <div className="p-2 rounded-xl bg-zinc-800 text-zinc-400">
-                  <CreditCard className="w-5 h-5" />
+                <div className="p-2 rounded-xl bg-zinc-800/80 text-zinc-400 border border-zinc-700/60 shrink-0">
+                  <CreditCard className="w-4 h-4" />
                 </div>
               </div>
 
               <div className="mt-4">
-                <span className="text-3xl font-extrabold text-emerald-400 tracking-tight">
+                <span className="text-2xl sm:text-3xl font-extrabold text-emerald-400 tracking-tight font-mono">
                   {formatCurrency(p.price)}
                 </span>
-                <span className="text-xs text-zinc-400 ml-1.5">
+                <span className="text-xs text-zinc-400 ml-1.5 font-sans">
                   / {p.durationValue} {p.durationUnit === 'MES' ? (p.durationValue === 1 ? 'mes' : 'meses') : (p.durationValue === 1 ? 'día' : 'días')}
                 </span>
               </div>
 
-              <p className="text-xs text-zinc-400 mt-3 leading-relaxed">
-                {p.description || 'Sin descripción detallada.'}
+              <p className="text-xs text-zinc-400 mt-2.5 leading-relaxed line-clamp-2">
+                {p.description || 'Acceso al gimnasio según duración pactada.'}
               </p>
 
-              <div className="mt-4 pt-3 border-t border-zinc-800/80 text-xs text-zinc-300 flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-zinc-500" />
-                <span>
+              <div className="mt-4 pt-3 border-t border-zinc-800/60 text-xs text-zinc-300 flex items-center gap-2 bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-900">
+                <Calendar className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <span className="font-semibold text-zinc-200">
                   {p.sessionsPerWeek ? `${p.sessionsPerWeek} días por semana` : 'Pase Libre Ilimitado'}
                 </span>
               </div>
             </div>
 
-            <div className="mt-6 pt-4 border-t border-zinc-800 flex items-center justify-between gap-2">
+            <div className="pt-3 border-t border-zinc-800/60 flex items-center justify-between gap-2">
               <button
                 type="button"
                 onClick={() => handleToggleActive(p)}
                 disabled={isTogglePending}
-                className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors cursor-pointer ${
+                className={`text-xs font-semibold px-3 py-2 rounded-xl border transition-colors cursor-pointer min-h-[38px] ${
                   p.isActive
                     ? 'border-zinc-700 text-zinc-300 hover:bg-zinc-800'
                     : 'border-emerald-800/80 text-emerald-400 bg-emerald-950/40 hover:bg-emerald-900/60'
@@ -132,17 +148,17 @@ export function PlansClient({ plans }: { plans: PlanItem[] }) {
               <button
                 type="button"
                 onClick={() => setEditingPlan(p)}
-                className="p-2 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-colors cursor-pointer"
+                className="p-2 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-xl transition-colors cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center border border-transparent hover:border-zinc-700"
                 title="Editar plan"
               >
                 <Edit2 className="w-4 h-4" />
               </button>
             </div>
-          </Card>
+          </div>
         ))}
       </div>
 
-      {/* Modal Desacoplado con Portal: Crear Plan */}
+      {/* Modal Desacoplado: Crear Plan */}
       <Modal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
@@ -170,6 +186,7 @@ export function PlansClient({ plans }: { plans: PlanItem[] }) {
               label="Precio (ARS)"
               name="price"
               type="number"
+              inputMode="decimal"
               step="100"
               placeholder="35000"
               required
@@ -181,27 +198,31 @@ export function PlansClient({ plans }: { plans: PlanItem[] }) {
               <option value="3">3 días x semana</option>
               <option value="4">4 días x semana</option>
               <option value="5">5 días x semana</option>
-              <option value="6">6 días x semana</option>
             </Select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <Input
-              label="Duración"
+              label="Duración (Valor)"
               name="durationValue"
               type="number"
-              min="1"
+              inputMode="numeric"
               defaultValue="1"
+              min="1"
               required
             />
-            <Select label="Unidad" name="durationUnit" defaultValue="MES">
-              <option value="MES">Mes(es)</option>
-              <option value="DIA">Día(s)</option>
+            <Select label="Unidad de Duración" name="durationUnit" defaultValue="MES">
+              <option value="MES">Meses</option>
+              <option value="DIA">Días</option>
             </Select>
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-zinc-800">
-            <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)}>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsCreateModalOpen(false)}
+            >
               Cancelar
             </Button>
             <Button type="submit" variant="primary" isLoading={isCreatePending}>
@@ -215,8 +236,8 @@ export function PlansClient({ plans }: { plans: PlanItem[] }) {
       <Modal
         isOpen={!!editingPlan}
         onClose={() => setEditingPlan(null)}
-        title="Modificar Plan de Cuota"
-        description="Actualizá los valores del plan. Los recibos ya emitidos conservarán su precio histórico."
+        title="Editar Plan de Membresía"
+        description="Actualizá el precio o las condiciones de este plan."
         maxWidth="md"
       >
         {editingPlan && (
@@ -247,6 +268,7 @@ export function PlansClient({ plans }: { plans: PlanItem[] }) {
                 label="Precio (ARS)"
                 name="price"
                 type="number"
+                inputMode="decimal"
                 step="100"
                 defaultValue={editingPlan.price}
                 required
@@ -262,7 +284,6 @@ export function PlansClient({ plans }: { plans: PlanItem[] }) {
                 <option value="3">3 días x semana</option>
                 <option value="4">4 días x semana</option>
                 <option value="5">5 días x semana</option>
-                <option value="6">6 días x semana</option>
               </Select>
             </div>
 
@@ -271,22 +292,31 @@ export function PlansClient({ plans }: { plans: PlanItem[] }) {
                 label="Duración"
                 name="durationValue"
                 type="number"
-                min="1"
+                inputMode="numeric"
                 defaultValue={editingPlan.durationValue}
+                min="1"
                 required
               />
-              <Select label="Unidad" name="durationUnit" defaultValue={editingPlan.durationUnit}>
-                <option value="MES">Mes(es)</option>
-                <option value="DIA">Día(s)</option>
+              <Select
+                label="Unidad"
+                name="durationUnit"
+                defaultValue={editingPlan.durationUnit}
+              >
+                <option value="MES">Meses</option>
+                <option value="DIA">Días</option>
               </Select>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-zinc-800">
-              <Button type="button" variant="outline" onClick={() => setEditingPlan(null)}>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setEditingPlan(null)}
+              >
                 Cancelar
               </Button>
               <Button type="submit" variant="primary" isLoading={isUpdatePending}>
-                Guardar Cambios
+                Actualizar Plan
               </Button>
             </div>
           </form>

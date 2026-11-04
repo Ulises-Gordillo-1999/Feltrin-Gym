@@ -38,9 +38,10 @@ export default function LoginPage() {
 
   useEffect(() => {
     // 1. Detectar estrictamente si es un dispositivo móvil (smartphone o tablet)
-    const isMobile =
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-      (window.matchMedia('(max-width: 768px)').matches && navigator.maxTouchPoints > 0);
+    const ua = navigator.userAgent || '';
+    const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(ua);
+    const isSmallTouch = window.matchMedia('(max-width: 768px)').matches && (navigator.maxTouchPoints || 0) > 0;
+    const isMobile = isMobileUA || isSmallTouch;
 
     setIsMobileDevice(isMobile);
 

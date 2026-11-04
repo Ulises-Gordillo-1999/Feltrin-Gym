@@ -198,7 +198,7 @@ export function InventoryClient({
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="grid grid-cols-2 gap-2.5 w-full sm:flex sm:w-auto">
           <Button
             variant="outline"
             onClick={() => {
@@ -208,6 +208,7 @@ export function InventoryClient({
               setIsCategoryModalOpen(true);
             }}
             icon={<FolderPlus className="w-4 h-4" />}
+            className="w-full sm:w-auto min-h-[44px]"
           >
             Nueva Categoría
           </Button>
@@ -216,6 +217,7 @@ export function InventoryClient({
             variant="primary"
             onClick={() => setIsCreateModalOpen(true)}
             icon={<Plus className="w-4 h-4 stroke-[2.5]" />}
+            className="w-full sm:w-auto min-h-[44px]"
           >
             Nuevo Artículo
           </Button>
@@ -223,18 +225,19 @@ export function InventoryClient({
       </div>
 
       {/* Buscador y Filtros */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <SearchBar
           value={search}
           onChange={setSearch}
           placeholder="Buscar por nombre, SKU o categoría..."
+          className="w-full"
         />
 
-        <div className="flex items-center gap-2">
+        <div className="w-full sm:w-56 shrink-0">
           <Select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="w-48 text-xs"
+            className="w-full"
           >
             <option value="ALL">Todas las Categorías</option>
             {categories.map((c) => (
@@ -250,7 +253,13 @@ export function InventoryClient({
       <Card className="p-0 overflow-hidden">
         {filteredProducts.length === 0 ? (
           <div className="py-16 text-center text-zinc-400 text-sm">
-            No se encontraron artículos en el inventario.
+            <Package className="w-10 h-10 text-zinc-600 mx-auto mb-2" />
+            <p className="font-semibold text-zinc-300">No se encontraron artículos en el inventario</p>
+            <p className="text-xs text-zinc-500 mt-1">
+              {categoryFilter !== 'ALL' || search
+                ? 'Probá cambiando la búsqueda o la categoría seleccionada.'
+                : 'Tocá "Nuevo Artículo" para cargar el primer producto.'}
+            </p>
           </div>
         ) : (
           <>

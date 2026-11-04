@@ -472,107 +472,203 @@ export function StudentDetailClient({
             No hay pagos registrados para este alumno.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm border-collapse">
-              <thead>
-                <tr className="border-b border-zinc-800 bg-zinc-900/60 text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
-                  <th className="py-3 px-4">Recibo N°</th>
-                  <th className="py-3 px-4">Fecha Pago</th>
-                  <th className="py-3 px-4">Plan / Concepto</th>
-                  <th className="py-3 px-4">Período Cubierto</th>
-                  <th className="py-3 px-4">Método</th>
-                  <th className="py-3 px-4">Monto</th>
-                  <th className="py-3 px-4">Estado</th>
-                  <th className="py-3 px-4 text-right">Comprobante</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-800/60">
-                {payments.map((p) => {
-                  const isVoid = p.status === 'ANULADO';
-                  return (
-                    <tr
-                      key={p.id}
-                      className={`hover:bg-zinc-900/40 transition-colors ${
-                        isVoid ? 'opacity-60 bg-zinc-950/40' : ''
-                      }`}
-                    >
-                      <td className="py-3 px-4 font-mono font-bold text-xs text-zinc-300">
-                        #{String(p.receiptNumber).padStart(6, '0')}
-                      </td>
-                      <td className="py-3 px-4 text-zinc-300 text-xs">
-                        {formatDate(p.paidAt)}
-                      </td>
-                      <td className="py-3 px-4 font-medium text-zinc-200">
-                        {p.planName}
-                      </td>
-                      <td className="py-3 px-4 text-xs text-zinc-300">
-                        {formatDate(p.periodStart)} al {formatDate(p.periodEnd)}
-                      </td>
-                      <td className="py-3 px-4 text-xs text-zinc-400">
-                        {p.paymentMethod.replace('_', ' ')}
-                      </td>
-                      <td className="py-3 px-4 font-semibold text-emerald-400">
-                        {formatCurrency(p.amount)}
-                      </td>
-                      <td className="py-3 px-4">
-                        <Badge variant={isVoid ? 'rose' : 'emerald'} size="sm" dot>
-                          {p.status}
-                        </Badge>
-                      </td>
-                      <td className="py-3 px-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          {!isVoid && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSelectedPaymentForWa({
-                                  id: p.id,
-                                  receiptNumber: p.receiptNumber,
-                                  amount: p.amount,
-                                  planName: p.planName,
-                                  periodEnd: p.periodEnd,
-                                });
-                              }}
-                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-950/40 hover:bg-emerald-900/50 border border-emerald-500/30 text-emerald-300 text-xs font-semibold transition-colors"
-                              title="Enviar recibo por WhatsApp"
-                            >
-                              <MessageCircle className="w-3.5 h-3.5" />
-                              <span>WhatsApp</span>
-                            </button>
-                          )}
-
-                          <a
-                            href={`/api/pdf/receipt/${p.id}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold transition-colors"
-                            title="Descargar PDF"
-                          >
-                            <Download className="w-3.5 h-3.5 text-emerald-400" />
-                            <span>PDF</span>
-                          </a>
-
-                          {isAdmin && !isVoid && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setVoidPaymentId(p.id);
-                                setVoidReason('');
-                              }}
-                              className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-400 hover:bg-rose-950/30 transition-colors cursor-pointer"
-                              title="Anular pago"
-                            >
-                              <AlertOctagon className="w-4 h-4" />
-                            </button>
-                          )}
+          <>
+            {/* VISTA MÓVIL: Tarjetas de Recibos (< md) */}
+            <div className="grid grid-cols-1 gap-3 p-3 md:hidden">
+              {payments.map((p) => {
+                const isVoid = p.status === 'ANULADO';
+                return (
+                  <div
+                    key={p.id}
+                    className={`p-4 rounded-2xl bg-zinc-900/70 border border-zinc-800/80 shadow-sm space-y-3 transition-all ${
+                      isVoid ? 'opacity-60 bg-zinc-950/40 line-through' : ''
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-bold text-xs text-zinc-300">
+                            #{String(p.receiptNumber).padStart(6, '0')}
+                          </span>
+                          <span className="text-xs font-semibold text-zinc-100">
+                            • {p.planName}
+                          </span>
                         </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                        <p className="text-xs text-zinc-400 mt-1">
+                          Período: {formatDate(p.periodStart)} al {formatDate(p.periodEnd)}
+                        </p>
+                      </div>
+
+                      <span className="text-base font-extrabold text-emerald-400 font-mono shrink-0">
+                        {formatCurrency(p.amount)}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between text-[11px] text-zinc-400 pt-2 border-t border-zinc-800/60">
+                      <div className="flex items-center gap-2">
+                        <span>{formatDate(p.paidAt)}</span>
+                        <span>•</span>
+                        <span>{p.paymentMethod.replace('_', ' ')}</span>
+                      </div>
+
+                      <Badge variant={isVoid ? 'rose' : 'emerald'} size="sm" dot>
+                        {p.status}
+                      </Badge>
+                    </div>
+
+                    {/* Acciones de la tarjeta */}
+                    <div className="flex items-center justify-end gap-2 pt-2 border-t border-zinc-800/60">
+                      {!isVoid && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedPaymentForWa({
+                              id: p.id,
+                              receiptNumber: p.receiptNumber,
+                              amount: p.amount,
+                              planName: p.planName,
+                              periodEnd: p.periodEnd,
+                            });
+                          }}
+                          className="px-2.5 py-1.5 rounded-xl bg-emerald-950/40 hover:bg-emerald-900/50 border border-emerald-500/30 text-emerald-300 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer min-h-[38px]"
+                        >
+                          <MessageCircle className="w-3.5 h-3.5" />
+                          <span>WhatsApp</span>
+                        </button>
+                      )}
+
+                      <a
+                        href={`/api/pdf/receipt/${p.id}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-2.5 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold flex items-center gap-1.5 transition-colors min-h-[38px]"
+                      >
+                        <Download className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>PDF</span>
+                      </a>
+
+                      {isAdmin && !isVoid && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setVoidPaymentId(p.id);
+                            setVoidReason('');
+                          }}
+                          className="p-2 rounded-xl text-zinc-400 hover:text-rose-400 hover:bg-rose-950/30 transition-colors cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center"
+                          title="Anular pago"
+                        >
+                          <AlertOctagon className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* VISTA DESKTOP: Tabla Tradicional (>= md) */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-sm border-collapse">
+                <thead>
+                  <tr className="border-b border-zinc-800 bg-zinc-900/60 text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
+                    <th className="py-3 px-4">Recibo N°</th>
+                    <th className="py-3 px-4">Fecha Pago</th>
+                    <th className="py-3 px-4">Plan / Concepto</th>
+                    <th className="py-3 px-4">Período Cubierto</th>
+                    <th className="py-3 px-4">Método</th>
+                    <th className="py-3 px-4">Monto</th>
+                    <th className="py-3 px-4">Estado</th>
+                    <th className="py-3 px-4 text-right">Comprobante</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-800/60">
+                  {payments.map((p) => {
+                    const isVoid = p.status === 'ANULADO';
+                    return (
+                      <tr
+                        key={p.id}
+                        className={`hover:bg-zinc-900/40 transition-colors ${
+                          isVoid ? 'opacity-60 bg-zinc-950/40' : ''
+                        }`}
+                      >
+                        <td className="py-3 px-4 font-mono font-bold text-xs text-zinc-300">
+                          #{String(p.receiptNumber).padStart(6, '0')}
+                        </td>
+                        <td className="py-3 px-4 text-zinc-300 text-xs">
+                          {formatDate(p.paidAt)}
+                        </td>
+                        <td className="py-3 px-4 font-medium text-zinc-200">
+                          {p.planName}
+                        </td>
+                        <td className="py-3 px-4 text-xs text-zinc-300">
+                          {formatDate(p.periodStart)} al {formatDate(p.periodEnd)}
+                        </td>
+                        <td className="py-3 px-4 text-xs text-zinc-400">
+                          {p.paymentMethod.replace('_', ' ')}
+                        </td>
+                        <td className="py-3 px-4 font-semibold text-emerald-400">
+                          {formatCurrency(p.amount)}
+                        </td>
+                        <td className="py-3 px-4">
+                          <Badge variant={isVoid ? 'rose' : 'emerald'} size="sm" dot>
+                            {p.status}
+                          </Badge>
+                        </td>
+                        <td className="py-3 px-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            {!isVoid && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedPaymentForWa({
+                                    id: p.id,
+                                    receiptNumber: p.receiptNumber,
+                                    amount: p.amount,
+                                    planName: p.planName,
+                                    periodEnd: p.periodEnd,
+                                  });
+                                }}
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-950/40 hover:bg-emerald-900/50 border border-emerald-500/30 text-emerald-300 text-xs font-semibold transition-colors"
+                                title="Enviar recibo por WhatsApp"
+                              >
+                                <MessageCircle className="w-3.5 h-3.5" />
+                                <span>WhatsApp</span>
+                              </button>
+                            )}
+
+                            <a
+                              href={`/api/pdf/receipt/${p.id}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold transition-colors"
+                              title="Descargar PDF"
+                            >
+                              <Download className="w-3.5 h-3.5 text-emerald-400" />
+                              <span>PDF</span>
+                            </a>
+
+                            {isAdmin && !isVoid && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setVoidPaymentId(p.id);
+                                  setVoidReason('');
+                                }}
+                                className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-400 hover:bg-rose-950/30 transition-colors cursor-pointer"
+                                title="Anular pago"
+                              >
+                                <AlertOctagon className="w-4 h-4" />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </Card>
 

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useActionState, useEffect, useTransition } from 'react';
-import { Plus, Dumbbell, Video, Pencil, Trash2, AlertTriangle } from 'lucide-react';
+import { Plus, Dumbbell, Video, Pencil, Trash2, AlertTriangle, Layers } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -102,6 +102,7 @@ export function ExercisesClient({ exercises }: { exercises: ExerciseItem[] }) {
 
   return (
     <div className="space-y-6">
+      {/* Header Compacto */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-zinc-100">
@@ -116,117 +117,145 @@ export function ExercisesClient({ exercises }: { exercises: ExerciseItem[] }) {
           variant="primary"
           onClick={() => setIsCreateModalOpen(true)}
           icon={<Plus className="w-4 h-4 stroke-[2.5]" />}
+          className="w-full sm:w-auto"
         >
           Nuevo Ejercicio
         </Button>
       </div>
 
-      {/* Buscador y Pestañas por Grupo Muscular */}
+      {/* Buscador y Carrusel Táctil por Grupo Muscular */}
       <div className="space-y-3">
         <SearchBar
           value={search}
           onChange={setSearch}
           placeholder="Buscar ejercicio o equipamiento..."
+          className="w-full"
         />
 
-        <div className="flex items-center gap-1.5 p-1 bg-zinc-900/90 border border-zinc-800 rounded-xl overflow-x-auto text-xs">
-          {MUSCLE_GROUPS.map((mg) => (
-            <button
-              key={mg.value}
-              type="button"
-              onClick={() => setMuscleFilter(mg.value)}
-              className={`px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer shrink-0 ${
-                muscleFilter === mg.value
-                  ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20'
-                  : 'text-zinc-400 hover:text-zinc-200'
-              }`}
-            >
-              {mg.label}
-            </button>
-          ))}
+        {/* Carrusel táctil horizontal con snap */}
+        <div className="flex items-center gap-1.5 p-1 bg-zinc-900/90 border border-zinc-800 rounded-2xl overflow-x-auto scrollbar-none snap-x -mx-4 px-4 sm:mx-0 sm:px-1">
+          {MUSCLE_GROUPS.map((mg) => {
+            const count =
+              mg.value === 'ALL'
+                ? exercises.length
+                : exercises.filter((e) => e.muscleGroup === mg.value).length;
+            const isSelected = muscleFilter === mg.value;
+
+            return (
+              <button
+                key={mg.value}
+                type="button"
+                onClick={() => setMuscleFilter(mg.value)}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl font-semibold transition-all cursor-pointer shrink-0 snap-start text-xs min-h-[38px] active:scale-95 ${
+                  isSelected
+                    ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-sm'
+                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40'
+                }`}
+              >
+                <span>{mg.label}</span>
+                <span
+                  className={`text-[10px] px-1.5 py-0.2 rounded-md ${
+                    isSelected ? 'bg-emerald-500/20 text-emerald-300' : 'bg-zinc-800 text-zinc-400'
+                  }`}
+                >
+                  {count}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* Grid de Ejercicios */}
       {filteredExercises.length === 0 ? (
         <Card className="py-16 text-center text-zinc-400 text-sm">
-          No se encontraron ejercicios con los criterios seleccionados.
+          <Dumbbell className="w-10 h-10 text-zinc-600 mx-auto mb-2" />
+          <p className="font-semibold text-zinc-300">No se encontraron ejercicios</p>
+          <p className="text-xs text-zinc-500 mt-1">
+            Probá cambiando el filtro muscular o tocá &ldquo;Nuevo Ejercicio&rdquo; para agregarlo.
+          </p>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
           {filteredExercises.map((ex) => (
-            <Card key={ex.id} hover className="flex flex-col justify-between group">
+            <div
+              key={ex.id}
+              className="p-4 rounded-2xl bg-zinc-900/70 border border-zinc-800/80 hover:border-zinc-700 shadow-sm flex flex-col justify-between space-y-3 transition-all"
+            >
               <div>
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="font-bold text-sm text-zinc-100 leading-snug">
                     {ex.name}
                   </h3>
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <Badge variant="blue" size="sm">
-                      {ex.muscleGroup}
-                    </Badge>
-
-                    {/* Botón Editar */}
-                    <button
-                      type="button"
-                      onClick={() => setEditingExercise(ex)}
-                      title="Editar ejercicio"
-                      className="p-1 rounded-md text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors cursor-pointer"
-                    >
-                      <Pencil className="w-3.5 h-3.5" />
-                    </button>
-
-                    {/* Botón Eliminar */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setDeleteError(null);
-                        setDeletingExercise(ex);
-                      }}
-                      title="Eliminar ejercicio"
-                      className="p-1 rounded-md text-zinc-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
+                  <Badge variant="blue" size="sm">
+                    {ex.muscleGroup}
+                  </Badge>
                 </div>
 
-                <div className="mt-3 flex items-center gap-1.5 text-xs text-zinc-300">
+                <div className="mt-2 flex items-center gap-1.5 text-xs text-zinc-400">
                   <Dumbbell className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
                   <span>{ex.equipment || 'Equipamiento libre / Corporal'}</span>
                 </div>
 
                 {ex.description && (
-                  <p className="mt-2 text-xs text-zinc-400 line-clamp-2">
+                  <p className="mt-2 text-xs text-zinc-400 line-clamp-2 leading-relaxed">
                     {ex.description}
                   </p>
                 )}
               </div>
 
-              {ex.videoUrl && (
-                <div className="mt-4 pt-3 border-t border-zinc-800/80">
-                  <a
-                    href={ex.videoUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400 hover:text-emerald-300"
-                  >
-                    <Video className="w-3.5 h-3.5" />
-                    <span>Ver Video de Técnica</span>
-                  </a>
+              <div className="pt-2 border-t border-zinc-800/60 flex items-center justify-between gap-2">
+                <div>
+                  {ex.videoUrl ? (
+                    <a
+                      href={ex.videoUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-400 hover:text-emerald-300"
+                    >
+                      <Video className="w-3.5 h-3.5" />
+                      <span>Video</span>
+                    </a>
+                  ) : (
+                    <span className="text-[11px] text-zinc-600 italic">Sin video</span>
+                  )}
                 </div>
-              )}
-            </Card>
+
+                {/* Acciones con área táctil cómoda */}
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setEditingExercise(ex)}
+                    title="Editar ejercicio"
+                    className="p-2 rounded-xl text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDeleteError(null);
+                      setDeletingExercise(ex);
+                    }}
+                    title="Eliminar ejercicio"
+                    className="p-2 rounded-xl text-zinc-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       )}
 
-      {/* Modal Desacoplado con Portal: Nuevo Ejercicio */}
+      {/* Modal Desacoplado: Crear Ejercicio */}
       <Modal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        title="Agregar Ejercicio a la Biblioteca"
-        description="Ingresá los datos del ejercicio para que los profesores puedan incluirlo en las rutinas."
+        title="Crear Nuevo Ejercicio"
+        description="Ingresá los datos del ejercicio para sumarlo a la biblioteca técnica."
         maxWidth="md"
       >
         <form action={formCreateAction} className="space-y-4">
@@ -236,49 +265,47 @@ export function ExercisesClient({ exercises }: { exercises: ExerciseItem[] }) {
             </div>
           )}
 
-          <Input
-            label="Nombre del Ejercicio"
-            name="name"
-            placeholder="Ej. Press Militar con Barra"
-            required
-          />
+          <Input label="Nombre del Ejercicio" name="name" placeholder="Ej. Press Banca Plano" required />
 
-          <Select label="Grupo Muscular" name="muscleGroup" required>
-            <option value="PECHO">Pecho</option>
-            <option value="ESPALDA">Espalda</option>
-            <option value="HOMBROS">Hombros</option>
-            <option value="BICEPS">Bíceps</option>
-            <option value="TRICEPS">Tríceps</option>
-            <option value="CUADRICEPS">Cuádriceps</option>
-            <option value="ISQUIOTIBIALES">Isquiotibiales</option>
-            <option value="GLUTEOS">Glúteos</option>
-            <option value="PANTORRILLAS">Pantorrillas</option>
-            <option value="ABDOMEN">Abdomen</option>
-            <option value="CARDIO">Cardio</option>
-            <option value="MOVILIDAD">Movilidad</option>
+          <Select label="Grupo Muscular Principal" name="muscleGroup" required>
+            {MUSCLE_GROUPS.filter((m) => m.value !== 'ALL').map((m) => (
+              <option key={m.value} value={m.value}>
+                {m.label}
+              </option>
+            ))}
           </Select>
 
           <Input
             label="Equipamiento Requerido"
             name="equipment"
-            placeholder="Ej. Barra Olímpica, Mancuernas, Polea Alta..."
+            placeholder="Ej. Barra olímpica, banco plano..."
           />
 
           <Input
-            label="Instrucciones o Claves de Técnica (Opcional)"
-            name="description"
-            placeholder="Ej. Codos a 45 grados, retracción escapular..."
-          />
-
-          <Input
-            label="Enlace a Video Demostrativo (Opcional)"
+            label="URL de Video Demostrativo (Opcional)"
             name="videoUrl"
             type="url"
-            placeholder="https://youtube.com/..."
+            placeholder="https://youtube.com/watch?v=..."
           />
 
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-zinc-800">
-            <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)}>
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-300 mb-1.5">
+              Instrucciones / Notas Técnicas
+            </label>
+            <textarea
+              name="description"
+              rows={3}
+              placeholder="Postura inicial, respiración, agarre..."
+              className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-base md:text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 font-sans resize-none"
+            />
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsCreateModalOpen(false)}
+            >
               Cancelar
             </Button>
             <Button type="submit" variant="primary" isLoading={isCreatePending}>
@@ -288,16 +315,16 @@ export function ExercisesClient({ exercises }: { exercises: ExerciseItem[] }) {
         </form>
       </Modal>
 
-      {/* Modal Desacoplado con Portal: Editar Ejercicio */}
+      {/* Modal Desacoplado: Editar Ejercicio */}
       <Modal
         isOpen={!!editingExercise}
         onClose={() => setEditingExercise(null)}
         title="Editar Ejercicio"
-        description="Modificá los detalles del ejercicio en la biblioteca oficial."
+        description="Modificá el nombre, grupo muscular o datos del ejercicio."
         maxWidth="md"
       >
         {editingExercise && (
-          <form key={editingExercise.id} action={formUpdateAction} className="space-y-4">
+          <form action={formUpdateAction} className="space-y-4">
             <input type="hidden" name="id" value={editingExercise.id} />
 
             {updateState.status === 'error' && (
@@ -310,7 +337,6 @@ export function ExercisesClient({ exercises }: { exercises: ExerciseItem[] }) {
               label="Nombre del Ejercicio"
               name="name"
               defaultValue={editingExercise.name}
-              placeholder="Ej. Press Militar con Barra"
               required
             />
 
@@ -320,104 +346,93 @@ export function ExercisesClient({ exercises }: { exercises: ExerciseItem[] }) {
               defaultValue={editingExercise.muscleGroup}
               required
             >
-              <option value="PECHO">Pecho</option>
-              <option value="ESPALDA">Espalda</option>
-              <option value="HOMBROS">Hombros</option>
-              <option value="BICEPS">Bíceps</option>
-              <option value="TRICEPS">Tríceps</option>
-              <option value="CUADRICEPS">Cuádriceps</option>
-              <option value="ISQUIOTIBIALES">Isquiotibiales</option>
-              <option value="GLUTEOS">Glúteos</option>
-              <option value="PANTORRILLAS">Pantorrillas</option>
-              <option value="ABDOMEN">Abdomen</option>
-              <option value="CARDIO">Cardio</option>
-              <option value="MOVILIDAD">Movilidad</option>
+              {MUSCLE_GROUPS.filter((m) => m.value !== 'ALL').map((m) => (
+                <option key={m.value} value={m.value}>
+                  {m.label}
+                </option>
+              ))}
             </Select>
 
             <Input
-              label="Equipamiento Requerido"
+              label="Equipamiento"
               name="equipment"
               defaultValue={editingExercise.equipment || ''}
-              placeholder="Ej. Barra Olímpica, Mancuernas, Polea Alta..."
             />
 
             <Input
-              label="Instrucciones o Claves de Técnica (Opcional)"
-              name="description"
-              defaultValue={editingExercise.description || ''}
-              placeholder="Ej. Codos a 45 grados, retracción escapular..."
-            />
-
-            <Input
-              label="Enlace a Video Demostrativo (Opcional)"
+              label="Video de Técnica (URL)"
               name="videoUrl"
               type="url"
               defaultValue={editingExercise.videoUrl || ''}
-              placeholder="https://youtube.com/..."
             />
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-zinc-800">
-              <Button type="button" variant="outline" onClick={() => setEditingExercise(null)}>
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-300 mb-1.5">
+                Instrucciones / Notas Técnicas
+              </label>
+              <textarea
+                name="description"
+                rows={3}
+                defaultValue={editingExercise.description || ''}
+                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-base md:text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 font-sans resize-none"
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setEditingExercise(null)}
+              >
                 Cancelar
               </Button>
               <Button type="submit" variant="primary" isLoading={isUpdatePending}>
-                Guardar Cambios
+                Actualizar Ejercicio
               </Button>
             </div>
           </form>
         )}
       </Modal>
 
-      {/* Modal Desacoplado con Portal: Confirmar Eliminación */}
+      {/* Modal Desacoplado: Eliminar Ejercicio */}
       <Modal
         isOpen={!!deletingExercise}
         onClose={() => setDeletingExercise(null)}
-        title="Eliminar Ejercicio"
-        description="¿Confirmás la eliminación de este ejercicio del banco de entrenamiento?"
-        maxWidth="md"
+        title="¿Eliminar Ejercicio?"
+        description="Esta acción eliminará el ejercicio del catálogo general."
+        maxWidth="sm"
       >
-        {deletingExercise && (
-          <div className="space-y-4">
-            {deleteError && (
-              <div className="p-3 rounded-xl bg-rose-950/60 border border-rose-900 text-rose-300 text-xs">
-                {deleteError}
-              </div>
-            )}
+        <div className="space-y-4">
+          <p className="text-sm text-zinc-300">
+            ¿Estás seguro de que querés eliminar el ejercicio{' '}
+            <strong className="text-zinc-100 font-bold">{deletingExercise?.name}</strong>?
+          </p>
 
-            <div className="p-4 rounded-xl bg-zinc-900/90 border border-zinc-800 space-y-2.5">
-              <div className="flex items-center gap-2 text-rose-400 font-semibold text-sm">
-                <AlertTriangle className="w-4 h-4 shrink-0" />
-                <span>Atención</span>
-              </div>
-              <p className="text-sm text-zinc-200">
-                Estás por eliminar: <strong className="text-zinc-100 font-bold">{deletingExercise.name}</strong> ({deletingExercise.muscleGroup}).
-              </p>
-              <p className="text-xs text-zinc-400 leading-relaxed">
-                Si el ejercicio ya fue asignado a la rutina de algún alumno, se archivará automáticamente para proteger el historial sin romper las planificaciones existentes. Si nunca fue utilizado, se borrará definitivamente.
-              </p>
+          {deleteError && (
+            <div className="p-3 rounded-xl bg-rose-950/60 border border-rose-900 text-rose-300 text-xs">
+              {deleteError}
             </div>
+          )}
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-zinc-800">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setDeletingExercise(null)}
-                disabled={isDeletePending}
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="button"
-                variant="danger"
-                isLoading={isDeletePending}
-                onClick={handleDelete}
-                icon={<Trash2 className="w-4 h-4" />}
-              >
-                Sí, Eliminar Ejercicio
-              </Button>
-            </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setDeletingExercise(null)}
+              disabled={isDeletePending}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              variant="danger"
+              onClick={handleDelete}
+              isLoading={isDeletePending}
+            >
+              Confirmar Eliminación
+            </Button>
           </div>
-        )}
+        </div>
       </Modal>
     </div>
   );

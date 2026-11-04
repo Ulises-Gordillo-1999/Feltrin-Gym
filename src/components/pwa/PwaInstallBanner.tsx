@@ -48,12 +48,12 @@ export function PwaInstallBanner() {
       setDeferredPrompt(cachedPrompt);
     }
 
-    // 5. En dispositivos móviles o si hay un prompt nativo listo, mostrar el cartel
+    // 5. El banner flotante automático es EXCLUSIVO para dispositivos móviles
     const isMobile =
       /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua) ||
       window.innerWidth <= 768;
 
-    if (!isDismissed && (isMobile || cachedPrompt)) {
+    if (!isDismissed && isMobile) {
       setShowBanner(true);
     }
 
@@ -63,7 +63,8 @@ export function PwaInstallBanner() {
       if (prompt) {
         setDeferredPrompt(prompt);
       }
-      if (!isDismissed) {
+      // Solo desplegar automáticamente en celulares para no molestar en PC
+      if (!isDismissed && isMobile) {
         setShowBanner(true);
       }
     };

@@ -101,6 +101,7 @@ export function StudentsListClient({
             variant="primary"
             onClick={() => setIsModalOpen(true)}
             icon={<Plus className="w-4 h-4 stroke-[2.5]" />}
+            className="w-full sm:w-auto"
           >
             Nuevo Alumno
           </Button>
@@ -108,59 +109,62 @@ export function StudentsListClient({
       </div>
 
       {/* Barra de Filtros y Búsqueda */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
         <SearchBar
           value={search}
           onChange={setSearch}
           placeholder="Buscar por nombre, apellido o DNI..."
-          className="max-w-md"
+          className="w-full md:max-w-md"
         />
 
-        {/* Pestañas de estado */}
-        <div className="flex items-center gap-1.5 p-1 bg-zinc-900/90 border border-zinc-800 rounded-xl overflow-x-auto text-xs">
+        {/* Pestañas de estado con Scroll Táctil */}
+        <div className="flex items-center gap-1.5 p-1 bg-zinc-900/90 border border-zinc-800 rounded-2xl overflow-x-auto scrollbar-none snap-x -mx-4 px-4 sm:mx-0 sm:px-1">
           <button
             type="button"
             onClick={() => setStatusFilter('ALL')}
-            className={`px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer shrink-0 snap-start min-h-[38px] active:scale-95 ${
               statusFilter === 'ALL'
-                ? 'bg-zinc-800 text-zinc-100 shadow-sm'
+                ? 'bg-zinc-800 text-zinc-100 shadow-sm border border-zinc-700/60'
                 : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
-            Todos ({students.length})
+            <span>Todos</span>
+            <span className="text-[10px] px-1.5 py-0.2 rounded-md bg-zinc-700/60 text-zinc-300">
+              {students.length}
+            </span>
           </button>
           <button
             type="button"
             onClick={() => setStatusFilter('AL_DIA')}
-            className={`px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer shrink-0 snap-start min-h-[38px] active:scale-95 ${
               statusFilter === 'AL_DIA'
-                ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-800/80'
+                ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-sm'
                 : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
-            Al día
+            <span>Al día</span>
           </button>
           <button
             type="button"
             onClick={() => setStatusFilter('POR_VENCER')}
-            className={`px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer shrink-0 snap-start min-h-[38px] active:scale-95 ${
               statusFilter === 'POR_VENCER'
-                ? 'bg-amber-950/80 text-amber-400 border border-amber-800/80'
+                ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 shadow-sm'
                 : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
-            Por vencer
+            <span>Por vencer</span>
           </button>
           <button
             type="button"
             onClick={() => setStatusFilter('VENCIDA')}
-            className={`px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer shrink-0 snap-start min-h-[38px] active:scale-95 ${
               statusFilter === 'VENCIDA'
-                ? 'bg-rose-950/80 text-rose-400 border border-rose-800/80'
+                ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30 shadow-sm'
                 : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
-            Vencidas
+            <span>Vencidas</span>
           </button>
         </div>
       </div>
@@ -169,7 +173,13 @@ export function StudentsListClient({
       <Card className="p-0 overflow-hidden">
         {filteredStudents.length === 0 ? (
           <div className="py-16 text-center text-zinc-400 text-sm">
-            No se encontraron alumnos que coincidan con la búsqueda o filtro aplicado.
+            <User className="w-10 h-10 text-zinc-600 mx-auto mb-2" />
+            <p className="font-semibold text-zinc-300">No se encontraron alumnos</p>
+            <p className="text-xs text-zinc-500 mt-1">
+              {students.length === 0
+                ? 'Todavía no hay alumnos registrados. Tocá "Nuevo Alumno" para empezar.'
+                : 'No hay socios que coincidan con la búsqueda o el filtro aplicado.'}
+            </p>
           </div>
         ) : (
           <>
